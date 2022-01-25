@@ -1,0 +1,649 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, Pants project contributors
+# This file is distributed under the same license as the pex package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: pex 2.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-01-25 12:04+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../api/vars.rst:2
+msgid "PEX runtime environment variables"
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"Boolean.        Deprecated: This env var is no longer used; all "
+"internally cached distributions in a PEX        are always installed into"
+" the local Pex dependency cache."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "Boolean."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Deprecated: This env var is no longer used; all internally cached "
+"distributions in a PEX"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "are always installed into the local Pex dependency cache."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"Boolean.        Enable coverage reporting for this PEX file.  This "
+"requires that the \"coverage\" module is        available in the PEX "
+"environment.        Default: false."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Enable coverage reporting for this PEX file.  This requires that the "
+"\"coverage\" module is"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "available in the PEX environment."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "Default: false."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"Filename.        Write the coverage data to the specified filename.  If "
+"PEX_COVERAGE_FILENAME is not        specified but PEX_COVERAGE is, "
+"coverage information will be printed to stdout and not saved."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "Filename."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Write the coverage data to the specified filename.  If "
+"PEX_COVERAGE_FILENAME is not"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"specified but PEX_COVERAGE is, coverage information will be printed to "
+"stdout and not saved."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"Boolean.        Emit UserWarnings to stderr. When false, warnings will "
+"only be logged at PEX_VERBOSE >= 1.        When unset the build-time "
+"value of `--emit-warnings` will be used.        Default: unset."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Emit UserWarnings to stderr. When false, warnings will only be logged at "
+"PEX_VERBOSE >= 1."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "When unset the build-time value of `--emit-warnings` will be used."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "Default: unset."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"String.        A colon-separated string containing paths to add to the "
+"runtime sys.path.        Should be used sparingly, e.g., if you know that"
+" code inside this PEX needs to        interact with code outside it."
+"        Ex: \"/path/to/lib1:/path/to/lib2\"        This is distinct from "
+"PEX_INHERIT_PATH, which controls how the interpreter's        existing "
+"sys.path (which you may not have control over) is scrubbed.        See "
+"also PEX_PATH for how to merge packages from other pexes into the current"
+" environment."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "String."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "A colon-separated string containing paths to add to the runtime sys.path."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Should be used sparingly, e.g., if you know that code inside this PEX "
+"needs to"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "interact with code outside it."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "Ex: \"/path/to/lib1:/path/to/lib2\""
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"This is distinct from PEX_INHERIT_PATH, which controls how the "
+"interpreter's"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "existing sys.path (which you may not have control over) is scrubbed."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"See also PEX_PATH for how to merge packages from other pexes into the "
+"current environment."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"Boolean.        Deprecated: This env var is no longer used since user "
+"code is now always unzipped before        execution."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Deprecated: This env var is no longer used since user code is now always "
+"unzipped before"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "execution."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"Boolean.        Ignore any errors resolving dependencies when invoking "
+"the PEX file. This can be useful if        you know that a particular "
+"failing dependency is not necessary to run the application.        "
+"Default: false."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Ignore any errors resolving dependencies when invoking the PEX file. This"
+" can be useful if"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"you know that a particular failing dependency is not necessary to run the"
+" application."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"Boolean.        Explicitly disable the reading/parsing of pexrc files "
+"(~/.pexrc).        Default: false."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "Explicitly disable the reading/parsing of pexrc files (~/.pexrc)."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"String (false|prefer|fallback)        Allow inheriting packages from "
+"site-packages, user site-packages and the PYTHONPATH. By        default, "
+"PEX scrubs any non stdlib packages from sys.path prior to invoking the "
+"application.        Using 'prefer' causes PEX to shift any non-stdlib "
+"packages before the pex environment on        sys.path and using "
+"'fallback' shifts them after instead.        Using this option is "
+"generally not advised, but can help in situations when certain        "
+"dependencies do not conform to standard packaging practices and thus "
+"cannot be bundled into        PEX files.        See also "
+"PEX_EXTRA_SYS_PATH for how to *add* to the sys.path.        Default: "
+"false."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "String (false|prefer|fallback)"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Allow inheriting packages from site-packages, user site-packages and the "
+"PYTHONPATH. By"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"default, PEX scrubs any non stdlib packages from sys.path prior to "
+"invoking the application."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Using 'prefer' causes PEX to shift any non-stdlib packages before the pex"
+" environment on"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "sys.path and using 'fallback' shifts them after instead."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Using this option is generally not advised, but can help in situations "
+"when certain"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"dependencies do not conform to standard packaging practices and thus "
+"cannot be bundled into"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "PEX files."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "See also PEX_EXTRA_SYS_PATH for how to *add* to the sys.path."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"Boolean.        Drop into a REPL instead of invoking the predefined entry"
+" point of this PEX. This can be        useful for inspecting the PEX "
+"environment interactively.  It can also be used to treat the PEX        "
+"file as an interpreter in order to execute other scripts in the context "
+"of the PEX file, e.g.        \"PEX_INTERPRETER=1 ./app.pex "
+"my_script.py\".  Equivalent to setting PEX_MODULE to empty.        "
+"Default: false."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Drop into a REPL instead of invoking the predefined entry point of this "
+"PEX. This can be"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"useful for inspecting the PEX environment interactively.  It can also be "
+"used to treat the PEX"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"file as an interpreter in order to execute other scripts in the context "
+"of the PEX file, e.g."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"\"PEX_INTERPRETER=1 ./app.pex my_script.py\".  Equivalent to setting "
+"PEX_MODULE to empty."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"String.        Override the entry point into the PEX file.  Can either be"
+" a module, e.g.        'SimpleHTTPServer', or a specific entry point in "
+"module:symbol form, e.g.  \"myapp.bin:main\"."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "Override the entry point into the PEX file.  Can either be a module, e.g."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"'SimpleHTTPServer', or a specific entry point in module:symbol form, e.g."
+"  \"myapp.bin:main\"."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"A set of one or more PEX files.        Merge the packages from other PEX "
+"files into the current environment.  This allows you to        do things "
+"such as create a PEX file containing the \"coverage\" module or create "
+"PEX files        containing plugin entry points to be consumed by a main "
+"application.  Paths should be        specified in the same manner as "
+"$PATH, e.g. PEX_PATH=/path/to/pex1.pex:/path/to/pex2.pex        and so "
+"forth.        See also PEX_EXTRA_SYS_PATH for how to add arbitrary "
+"entries to the sys.path."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "A set of one or more PEX files."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Merge the packages from other PEX files into the current environment.  "
+"This allows you to"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"do things such as create a PEX file containing the \"coverage\" module or"
+" create PEX files"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"containing plugin entry points to be consumed by a main application.  "
+"Paths should be"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"specified in the same manner as $PATH, e.g. "
+"PEX_PATH=/path/to/pex1.pex:/path/to/pex2.pex"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "and so forth."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"See also PEX_EXTRA_SYS_PATH for how to add arbitrary entries to the "
+"sys.path."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"Boolean.        Enable application profiling.  If specified and "
+"PEX_PROFILE_FILENAME is not specified, PEX        will print profiling "
+"information to stdout."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Enable application profiling.  If specified and PEX_PROFILE_FILENAME is "
+"not specified, PEX"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "will print profiling information to stdout."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"Filename.        Profile the application and dump a profile into the "
+"specified filename in the standard        \"profile\" module format."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Profile the application and dump a profile into the specified filename in"
+" the standard"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "\"profile\" module format."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"String.        Toggle the profile sorting algorithm used to print out "
+"profile columns.        Default: 'cumulative'."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "Toggle the profile sorting algorithm used to print out profile columns."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "Default: 'cumulative'."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"String.        Override the Python interpreter used to invoke this PEX.  "
+"Can be either an absolute path to        an interpreter or a base name "
+"e.g.  \"python3.3\".  If a base name is provided, the $PATH will        "
+"be searched for an appropriate match."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Override the Python interpreter used to invoke this PEX.  Can be either "
+"an absolute path to"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"an interpreter or a base name e.g.  \"python3.3\".  If a base name is "
+"provided, the $PATH will"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "be searched for an appropriate match."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"String.        A colon-separated string containing paths of blessed "
+"Python interpreters        for overriding the Python interpreter used to "
+"invoke this PEX. Can be absolute paths to        interpreters or standard"
+" $PATH style directory entries that are searched for child files that"
+"        are python binaries.        Ex: "
+"\"/path/to/python27:/path/to/python36-distribution/bin\""
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "A colon-separated string containing paths of blessed Python interpreters"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"for overriding the Python interpreter used to invoke this PEX. Can be "
+"absolute paths to"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"interpreters or standard $PATH style directory entries that are searched "
+"for child files that"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "are python binaries."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "Ex: \"/path/to/python27:/path/to/python36-distribution/bin\""
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"Directory.        The directory location for PEX to cache any "
+"dependencies and code.  PEX must write not-zip-        safe eggs and all "
+"wheels to disk in order to activate them.        Default: ~/.pex"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "Directory."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"The directory location for PEX to cache any dependencies and code.  PEX "
+"must write not-zip-"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "safe eggs and all wheels to disk in order to activate them."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "Default: ~/.pex"
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"String.        The script name within the PEX environment to execute.  "
+"This must either be an entry point        as defined in a distribution's "
+"console_scripts, or a script as defined in a distribution's        "
+"scripts section.  While Python supports any script including shell "
+"scripts, PEX only        supports invocation of Python scripts in this "
+"fashion."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"The script name within the PEX environment to execute.  This must either "
+"be an entry point"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"as defined in a distribution's console_scripts, or a script as defined in"
+" a distribution's"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"scripts section.  While Python supports any script including shell "
+"scripts, PEX only"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "supports invocation of Python scripts in this fashion."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"Boolean.        Enable verbosity for when the interpreter shuts down.  "
+"This is mostly only useful for        debugging PEX itself.        "
+"Default: false."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Enable verbosity for when the interpreter shuts down.  This is mostly "
+"only useful for"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "debugging PEX itself."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid "Boolean.        Run the PEX tools.        Default: false."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "Run the PEX tools."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"Boolean.        Deprecated: This env var is no longer used since "
+"unzipping PEX zip files before execution        is now the default."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Deprecated: This env var is no longer used since unzipping PEX zip files "
+"before execution"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "is now the default."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"Boolean.        Force this PEX to create a venv under $PEX_ROOT and re-"
+"execute from there.  If the pex file        will be run multiple times "
+"under a stable $PEX_ROOT the venv creation will only be performed        "
+"once and subsequent runs will enjoy lower startup latency.        "
+"Default: false."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Force this PEX to create a venv under $PEX_ROOT and re-execute from "
+"there.  If the pex file"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"will be run multiple times under a stable $PEX_ROOT the venv creation "
+"will only be performed"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "once and subsequent runs will enjoy lower startup latency."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"String (false|prepend|append).        When running in PEX_VENV mode, "
+"optionally add the scripts and console scripts of        distributions in"
+" the PEX file to the $PATH.        Default: false."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "String (false|prepend|append)."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"When running in PEX_VENV mode, optionally add the scripts and console "
+"scripts of"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "distributions in the PEX file to the $PATH."
+msgstr ""
+
+#: ../../api/vars.rst:4
+msgid ""
+"Integer.        Set the verbosity level of PEX debug logging.  The higher"
+" the number, the more logging, with        0 being disabled.  This "
+"environment variable can be extremely useful in debugging PEX        "
+"environment issues.        Default: 0"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "Integer."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"Set the verbosity level of PEX debug logging.  The higher the number, the"
+" more logging, with"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid ""
+"0 being disabled.  This environment variable can be extremely useful in "
+"debugging PEX"
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "environment issues."
+msgstr ""
+
+#: ../../api/vars.rst
+msgid "Default: 0"
+msgstr ""
+

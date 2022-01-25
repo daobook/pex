@@ -1,0 +1,85 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, Pants project contributors
+# This file is distributed under the same license as the pex package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: pex 2.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-01-25 12:04+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../whatispex.rst:5
+msgid "What are .pex files?"
+msgstr ""
+
+#: ../../whatispex.rst:8
+msgid "tl;dr"
+msgstr ""
+
+#: ../../whatispex.rst:10
+msgid ""
+"PEX files are self-contained executable Python virtual environments.  "
+"More specifically, they are carefully constructed zip files with a "
+"``#!/usr/bin/env python`` and special ``__main__.py`` that allows you to "
+"interact with the PEX runtime.  For more information about zip "
+"applications, see `PEP 441 <https://www.python.org/dev/peps/pep-0441/>`_."
+msgstr ""
+
+#: ../../whatispex.rst:16
+msgid ""
+"To get started building your first pex files, go straight to "
+":ref:`buildingpex`."
+msgstr ""
+
+#: ../../whatispex.rst:20
+msgid "Why .pex files?"
+msgstr ""
+
+#: ../../whatispex.rst:22
+msgid ""
+"Files with the .pex extension -- \"PEX files\" or \".pex files\" -- are "
+"self-contained executable Python virtual environments.  PEX files make it"
+" easy to deploy Python applications: the deployment process becomes "
+"simply ``scp``."
+msgstr ""
+
+#: ../../whatispex.rst:27
+msgid ""
+"Single PEX files can support multiple platforms and python interpreters, "
+"making them an attractive option to distribute applications such as "
+"command line tools.  For example, this feature allows the convenient use "
+"of the same PEX file on both OS X laptops and production Linux AMIs."
+msgstr ""
+
+#: ../../whatispex.rst:33
+msgid "How do .pex files work?"
+msgstr ""
+
+#: ../../whatispex.rst:35
+msgid ""
+"PEX files rely on a feature in the Python importer that considers the "
+"presence of a ``__main__.py`` within the module as a signal to treat that"
+" module as an executable.  For example, ``python -m my_module`` or "
+"``python my_module`` will execute ``my_module/__main__.py`` if it exists."
+msgstr ""
+
+#: ../../whatispex.rst:40
+msgid ""
+"Because of the flexibility of the Python import subsystem, ``python -m "
+"my_module`` works regardless if ``my_module`` is on disk or within a zip "
+"file.  Adding ``#!/usr/bin/env python`` to the top of a .zip file "
+"containing a ``__main__.py`` and marking it executable will turn it into "
+"an executable Python program.  pex takes advantage of this feature in "
+"order to build executable .pex files.  This is described more thoroughly "
+"in `PEP 441 <https://www.python.org/dev/peps/pep-0441/>`_."
+msgstr ""
+

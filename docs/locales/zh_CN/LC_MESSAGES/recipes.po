@@ -1,0 +1,133 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, Pants project contributors
+# This file is distributed under the same license as the pex package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: pex 2.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-01-25 12:04+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.0\n"
+
+#: ../../recipes.rst:4
+msgid "PEX Recipes and Notes"
+msgstr ""
+
+#: ../../recipes.rst:7
+msgid "PEX app in a container"
+msgstr ""
+
+#: ../../recipes.rst:9
+msgid ""
+"If you want to use a PEX application in a container, you can get the "
+"smallest container footprint and the lowest latency application start-up "
+"by installing it with the ``venv`` Pex tool. First make sure you build "
+"the pex with ``--include-tools`` (or ``--venv``), and then install it in "
+"the container like so:"
+msgstr ""
+
+#: ../../recipes.rst:20
+msgid "The Pex ``venv`` tool will:"
+msgstr ""
+
+#: ../../recipes.rst:22
+msgid ""
+"Install the PEX as a traditional venv at ``/my-app`` with a script at "
+"``/my-app/pex`` that runs just like the original PEX."
+msgstr ""
+
+#: ../../recipes.rst:24
+msgid "Pre-compile all PEX Python code installed in the venv."
+msgstr ""
+
+#: ../../recipes.rst:25
+msgid ""
+"Remove the original ``/my-app.pex`` as well as any temporary caches "
+"created by Pex in the ``PEX_ROOT``, leaving just the newly installed and "
+"pre-compiled ``/my-app`` venv."
+msgstr ""
+
+#: ../../recipes.rst:29
+msgid "PEX-aware application"
+msgstr ""
+
+#: ../../recipes.rst:31
+msgid ""
+"If your code benefits from knowing whether it is running from within a "
+"PEX or not, you can inspect the ``PEX`` environment variable. If it is "
+"set, it will be the absolute path of the PEX your code is running in. "
+"Normally this will be a PEX zip file, but it could be a directory path if"
+" the PEX was built with a ``--layout`` of ``packed`` or ``loose``."
+msgstr ""
+
+#: ../../recipes.rst:37
+msgid "Gunicorn and PEX"
+msgstr ""
+
+#: ../../recipes.rst:39
+msgid ""
+"Normally, to run a wsgi-compatible application with Gunicorn, you'd just "
+"point Gunicorn at your application, tell Gunicorn how to run it, and "
+"you're ready to go - but if your application is shipping as a PEX file, "
+"you'll have to bundle Gunicorn as a dependency and set Gunicorn as your "
+"entry point. Gunicorn can't enter a PEX file to retrieve the wsgi "
+"instance, but that doesn't prevent the PEX from invoking Gunicorn."
+msgstr ""
+
+#: ../../recipes.rst:46
+msgid ""
+"This retains the benefit of zero `pip install`'s to run your service, but"
+" it requires a bit more setup as you must ensure Gunicorn is packaged as "
+"a dependency. The following snippets assume Flask as the wsgi framework, "
+"Django setup should be similar:"
+msgstr ""
+
+#: ../../recipes.rst:55
+msgid ""
+"Once your pex file is created, you need to make sure to pass your wsgi "
+"app instance name to the CLI at runtime for Gunicorn to know how to hook "
+"into it, configuration can be passed in the same way:"
+msgstr ""
+
+#: ../../recipes.rst:63
+msgid "And there you have it, a fully portable python web service."
+msgstr ""
+
+#: ../../recipes.rst:66
+msgid "PEX and Proxy settings"
+msgstr ""
+
+#: ../../recipes.rst:68
+msgid ""
+"While building pex files, you may need to fetch dependencies through a "
+"proxy. The easiest way is to use pex cli with the requests extra and "
+"environment variables. Following are the steps to do just that:"
+msgstr ""
+
+#: ../../recipes.rst:70
+msgid "Install pex with requests"
+msgstr ""
+
+#: ../../recipes.rst:76
+msgid "Set the environment variables"
+msgstr ""
+
+#: ../../recipes.rst:84
+msgid "Now you can test by running"
+msgstr ""
+
+#: ../../recipes.rst:90
+msgid ""
+"For more information on the requests module support for proxies via "
+"environment variables, see the official documentation here: http://docs"
+".python-requests.org/en/master/user/advanced/#proxies."
+msgstr ""
+
