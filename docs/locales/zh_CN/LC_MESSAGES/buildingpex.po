@@ -19,7 +19,7 @@ msgstr ""
 
 #: ../../buildingpex.rst:4
 msgid "Building .pex files"
-msgstr ""
+msgstr "构建 .pex 文件"
 
 #: ../../buildingpex.rst:6
 msgid ""
@@ -27,6 +27,8 @@ msgid ""
 "available when you ``pip install pex``. Do this within a virtualenv, then"
 " you can use pex to bootstrap itself:"
 msgstr ""
+"你可以使用 ``pex`` 工具建立 .pex 文件，该工具在你 ``pip install pex`` 时可用。"
+"在 virtualenv 中这样做，然后你可以使用 pex 来启动自己："
 
 #: ../../buildingpex.rst:13
 msgid ""
@@ -35,6 +37,8 @@ msgid ""
 "assuming ~/bin is on your $PATH, then you can use pex in or outside of "
 "any virtualenv."
 msgstr ""
+"这个命令创建了一个包含 pex 和 requests 的 pex 文件，使用名为 \"pex\" 的控制台脚本，将其保存在 ~/bin/pex。"
+"在这一点上，假设 ~/bin 在你的 $PATH 上，那么你可以在任何 virtualenv 内或外使用 pex。"
 
 #: ../../buildingpex.rst:18
 msgid ""
@@ -42,14 +46,16 @@ msgid ""
 "setuptools command which is available if you ``pip install pex``.  For "
 "example, to clone and build pip from source:"
 msgstr ""
+"构建 .pex 文件的第二个最简单的方法是使用 ``bdist_pex`` setuptools 命令，如果你 ``pip install pex`` 就可以使用。"
+"例如，从源代码克隆和构建 pip："
 
 #: ../../buildingpex.rst:28
 msgid "Both are described in more detail below."
-msgstr ""
+msgstr "下面对这两种情况进行了更详细的描述。"
 
 #: ../../buildingpex.rst:31
 msgid "Invoking the ``pex`` utility"
-msgstr ""
+msgstr "调用 ``pex`` 工具"
 
 #: ../../buildingpex.rst:33
 msgid ""
@@ -57,6 +63,8 @@ msgid ""
 "construct an empty environment and invoke it.  When no entry point is "
 "specified, \"invocation\" means starting an interpreter:"
 msgstr ""
+"``pex`` 工具没有必要的参数，默认情况下会构建一个空环境并调用它。"
+"当没有指定入口点时，\"invocation\" 意味着启动一个解释器："
 
 #: ../../buildingpex.rst:45
 msgid ""
@@ -64,6 +72,7 @@ msgid ""
 "of the ``pex`` command invocation and is garbage collected immediately on"
 " exit."
 msgstr ""
+"这创建了一个短暂的环境，只存在于 ``pex`` 命令调用的时间内，并在退出时立即被垃圾回收。"
 
 #: ../../buildingpex.rst:48
 msgid ""
@@ -71,10 +80,12 @@ msgid ""
 "  PATH can be either the absolute path of a Python binary or the name of "
 "a Python interpreter within the environment, e.g.:"
 msgstr ""
+"你可以通过指定 ``--python=PATH`` 来定制使用哪个解释器。"
+"PATH 可以是 Python 二进制文件的绝对路径，也可以是环境中 Python 解释器的名称，例如 ::"
 
 #: ../../buildingpex.rst:74
 msgid "Specifying requirements"
-msgstr ""
+msgstr "指定要求"
 
 #: ../../buildingpex.rst:76
 msgid ""
@@ -84,10 +95,12 @@ msgid ""
 "number (including 0) may be specified.  For example, to start an "
 "environment with ``flask`` and ``psutil>1``:"
 msgstr ""
+"要求使用与 ``pip`` 和 ``setuptools`` 预期相同的形式来指定，例如 ``flask``，``setuptools==2.1.2``，``Django>=1.4,<1.6``。"
+"这些被指定为 pex 的参数，可以指定任何数字（包括 0）。例如，要启动一个带有 ``flask`` 和 ``psutil>1`` 的环境："
 
 #: ../../buildingpex.rst:90
 msgid "You can then import and manipulate modules like you would otherwise:"
-msgstr ""
+msgstr "然后你可以像其他方式一样导入和操作模块："
 
 #: ../../buildingpex.rst:98
 msgid ""
@@ -95,20 +108,23 @@ msgid ""
 "dependencies) can be passed directly to ``pex``. This provides a handy "
 "way to freeze a virtualenv into a PEX file."
 msgstr ""
+"方便的是，``pip freeze`` 的输出（一个被钉住的依赖列表）可以直接传递给 ``pex``。"
+"这提供了一个方便的方法，可以将虚拟环境冻结到 PEX 文件中。"
 
 #: ../../buildingpex.rst:104
 msgid "A ``requirements.txt`` file may also be used, just as with ``pip``."
-msgstr ""
+msgstr "也可以使用 ``requirements.txt`` 文件，就像使用 ``pip`` 一样。"
 
 #: ../../buildingpex.rst:112
 msgid "Specifying entry points"
-msgstr ""
+msgstr "指定入口点"
 
 #: ../../buildingpex.rst:114
 msgid ""
 "Entry points define how the environment is executed and may be specified "
 "in one of three ways."
 msgstr ""
+"入口点定义了环境的执行方式，可以用三种方式之一来指定。"
 
 #: ../../buildingpex.rst:117
 msgid "pex <options> -- script.py"
@@ -120,12 +136,14 @@ msgid ""
 "behavior is to emulate an interpreter.  First we create a simple flask "
 "application:"
 msgstr ""
+"如上所述，如果没有指定入口点，默认行为是模拟一个解释器。首先我们创建一个简单的 flask 应用程序："
 
 #: ../../buildingpex.rst:135
 msgid ""
 "Then, like an interpreter, if a source file is specified as a parameter "
 "to pex, it is invoked:"
 msgstr ""
+"然后，像一个解释器一样，如果一个源文件被指定为 pex 的参数，它就会被调用："
 
 #: ../../buildingpex.rst:143
 msgid "pex -m"
@@ -137,20 +155,24 @@ msgid ""
 "entry point within the standard library.  ``pex -m`` behaves very "
 "similarly to ``python -m``.  Consider ``python -m pydoc``:"
 msgstr ""
+"你的代码可能在 PEX 文件中，也可能是标准库中的某个预定的入口点。"
+"``pex -m`` 的行为与 ``python -m`` 非常相似。考虑一下 ``python -m pydoc``："
 
 #: ../../buildingpex.rst:160
 msgid "This can be emulated using the ``pex`` tool using ``-m pydoc``:"
-msgstr ""
+msgstr "这可以用 ``-m pydoc`` 的 ``pex`` 工具来模拟。"
 
 #: ../../buildingpex.rst:173
 msgid ""
 "Arguments will be passed unescaped following ``--`` on the command line."
 "  So in order to get pydoc help on the ``flask.app`` package in Flask:"
 msgstr ""
+"参数将在命令行的 ``--`` 后面不加转义地传递。"
+" 因此，为了在 Flask 中的 ``flask.app`` 包上获得 pydoc 帮助："
 
 #: ../../buildingpex.rst:192
 msgid "and so forth."
-msgstr ""
+msgstr "诸如此类。"
 
 #: ../../buildingpex.rst:194
 msgid ""
@@ -159,6 +181,8 @@ msgid ""
 "respectively.  This is roughly equivalent to running a script that does "
 "``import sys, from package import target; sys.exit(target())``."
 msgstr ""
+"入口点也可以采取 ``package:target`` 的形式，比如 ``sphinx:main`` 或 ``fabric.main:main`` 分别代表 Sphinx 和 Fabric。"
+"这大致相当于运行一个脚本，做 ``import sys, from package import target; sys.exit(target())``。"
 
 #: ../../buildingpex.rst:198
 msgid ""
@@ -166,6 +190,7 @@ msgid ""
 "having to ``pip install`` anything, for example a one-off invocation of "
 "Sphinx with the readthedocs theme available:"
 msgstr ""
+"这可能是调用 Python 应用程序的一种强大方式，而不需要 ``pip install`` 任何东西，例如一次性调用 Sphinx 的 readthedocs 主题可用："
 
 #: ../../buildingpex.rst:214
 msgid ""
@@ -175,12 +200,15 @@ msgid ""
 "<https://docs.python.org/library/sys.html#sys.exit>`_ documentation to be"
 " sure."
 msgstr ""
+"尽管 sys.exit 被盲目地应用于目标函数的返回值，但由于 ``sys.exit`` 语义非常灵活，这可能会达到你想要的效果。"
+"请咨询你的目标函数和 `sys.exit <https://docs.python.org/library/sys.html#sys.exit>`_ 文档以确定。"
 
 #: ../../buildingpex.rst:218
 msgid ""
 "Almost certainly better and more stable, you can alternatively specify a "
 "console script exported by the app as explained below."
 msgstr ""
+"几乎可以肯定的是，你可以选择指定一个由应用程序导出的控制台脚本，如下文所述。"
 
 #: ../../buildingpex.rst:222
 msgid "pex -c"
@@ -193,12 +221,16 @@ msgid ""
 "console script as defined by the distribution. For example, Fabric "
 "provides the ``fab`` tool when pip installed:"
 msgstr ""
+"如果你不知道你喜欢的 python 包的控制台脚本的 ``package:target``，"
+"pex 允许你使用 ``-c`` 来指定一个由发行版定义的控制台脚本。"
+"例如，Fabric 在 pip 安装时提供了 ``fab`` 工具："
 
 #: ../../buildingpex.rst:237
 msgid ""
 "Even scripts defined by the \"scripts\" section of a distribution can be "
 "used, e.g. with boto:"
 msgstr ""
+"即使是由发行版的 \"scripts\" 部分定义的脚本也可以使用，例如，用 boto："
 
 #: ../../buildingpex.rst:247
 msgid ""
@@ -212,10 +244,16 @@ msgid ""
 "the `Python packaging documentation <https://python-"
 "packaging.readthedocs.io/en/latest/command-line-scripts.html>`_."
 msgstr ""
+"注意：如果你运行 ``pex -c``，遇到类似 ``pex.pex_builder.InvalidExecutableSpecification: Could not find script "
+"'mainscript.py' in any distribution within PEX!`` 这样的错误，"
+"请仔细检查你的 setup.py，确保 ``mainscript.py`` 包含在你的 setup 的 ``scripts`` 阵列中。"
+"如果你使用 ``console_scripts`` 并遇到这个错误，请仔细检查你的 ``console_scripts`` 语法 - "
+"关于 ``scripts`` 和 ``console_scripts`` 的进一步信息可以在 `Python 打包文档 "
+"<https://python-packaging.readthedocs.io/en/latest/command-line-scripts.html>`_ 中找到。"
 
 #: ../../buildingpex.rst:257
 msgid "Saving .pex files"
-msgstr ""
+msgstr "保存 .pex 文件"
 
 #: ../../buildingpex.rst:259
 msgid ""
@@ -223,6 +261,7 @@ msgid ""
 "environments -- environments that only exist for the duration of the pex "
 "command lifetime and immediately garbage collected."
 msgstr ""
+"上面的每个命令都在操纵短暂的 PEX 环境--这些环境只在 pex 命令的有效期内存在，并立即被垃圾回收。"
 
 #: ../../buildingpex.rst:262
 msgid ""
@@ -230,14 +269,16 @@ msgid ""
 "saved to disk at ``PATH``.  For example we can package a standalone "
 "Sphinx as above:"
 msgstr ""
+"如果指定了 ``-o PATH`` 选项，环境的 PEX 文件就会保存在磁盘的 ``PATH`` 处。"
+"例如，我们可以像上面那样打包一个独立的 Sphinx："
 
 #: ../../buildingpex.rst:269
 msgid "Instead of executing the environment, it is saved to disk:"
-msgstr ""
+msgstr "而不是执行环境，它被保存到磁盘："
 
 #: ../../buildingpex.rst:276
 msgid "This is an executable environment and can be executed as before:"
-msgstr ""
+msgstr "这是一个可执行的环境，可以像以前一样执行："
 
 #: ../../buildingpex.rst:292
 msgid ""
@@ -246,6 +287,8 @@ msgid ""
 "interpreter is specified with ``--python``, e.g. pypy, it will be the "
 "default hashbang in the PEX file:"
 msgstr ""
+"和以前一样，进入点不是必须的，如果没有指定，PEX 将默认为直接进入一个解释器。"
+"如果用 ``--python`` 指定了另一个解释器，例如 pypy，它将成为 PEX 文件中默认的 hashbang："
 
 #: ../../buildingpex.rst:300
 msgid "The hashbang of the PEX file specifies PyPy:"
