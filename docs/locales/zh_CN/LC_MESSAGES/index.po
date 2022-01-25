@@ -60,6 +60,10 @@ msgid ""
 "spirit to `virtualenv <http://virtualenv.org>`_.  PEX files have been "
 "used by Twitter to deploy Python applications to production since 2011."
 msgstr ""
+"pex 包含了 Python 打包和发布库，最初是通过 `twitter commons <https://github.com/twitter/commons>`_ 提供的，"
+"但后来被分割成一个单独的项目。pex 最显著的组成部分是 .pex (Python EXecutable) 格式和相关的 ``pex`` 工具，"
+"它提供了一个通用的 Python 环境虚拟化解决方案，其精神类似于 `virtualenv <http://virtualenv.org>`_。"
+"自 2011 年以来，PEX 文件一直被 Twitter 用于将 Python 应用程序部署到生产中。"
 
 #: ../../index.rst:21
 msgid ""
@@ -69,8 +73,11 @@ msgid ""
 "is PEX? <http://www.youtube.com/watch?v=NmpnGhRwsu0>`_. To go straight to"
 " building pex files, see :ref:`buildingpex`."
 msgstr ""
+"要了解更多关于 .pex 格式是什么以及为什么它可能对你有用，请参见 :ref:`whatispex` 对于没有耐心的人，"
+"还有一个由 Twitter 大学发布的闪电讲座（稍有过时）：`WTF is PEX? <http://www.youtube.com/watch?v=NmpnGhRwsu0>`_。"
+"要直接建立pex文件，请看 :ref:`buildingpex`。"
 
 #: ../../index.rst:27
 msgid "Guide:"
-msgstr ""
+msgstr "指南"
 
