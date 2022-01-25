@@ -19,7 +19,7 @@ msgstr ""
 
 #: ../../whatispex.rst:5
 msgid "What are .pex files?"
-msgstr ""
+msgstr "什么是 .pex 文件？"
 
 #: ../../whatispex.rst:8
 msgid "tl;dr"
@@ -33,16 +33,20 @@ msgid ""
 "interact with the PEX runtime.  For more information about zip "
 "applications, see `PEP 441 <https://www.python.org/dev/peps/pep-0441/>`_."
 msgstr ""
+"PEX 文件是独立的可执行的 Python 虚拟环境。 "
+"更确切地说，它们是精心构造的压缩文件，带有 ``#!/usr/bin/env python`` 和特殊的 ``__main__.py``，允许你与 PEX 运行时交互。"
+"关于 zip 应用程序的更多信息，见 `PEP 441 <https://www.python.org/dev/peps/pep-0441/>`_。"
 
 #: ../../whatispex.rst:16
 msgid ""
 "To get started building your first pex files, go straight to "
 ":ref:`buildingpex`."
 msgstr ""
+"要开始建立你的第一个 pex 文件，请直接进入 :ref:`buildingpex`。"
 
 #: ../../whatispex.rst:20
 msgid "Why .pex files?"
-msgstr ""
+msgstr "为什么是 .pex 文件？"
 
 #: ../../whatispex.rst:22
 msgid ""
@@ -51,6 +55,8 @@ msgid ""
 " easy to deploy Python applications: the deployment process becomes "
 "simply ``scp``."
 msgstr ""
+"带有 .pex 扩展名的文件 -- （\"PEX 文件\" 或 \".pex 文件\"） -- 是独立的可执行的 Python 虚拟环境。"
+"PEX 文件使部署 Python 应用程序变得很容易：部署过程变得像 ``scp`` 那样简单。"
 
 #: ../../whatispex.rst:27
 msgid ""
@@ -59,10 +65,12 @@ msgid ""
 "command line tools.  For example, this feature allows the convenient use "
 "of the same PEX file on both OS X laptops and production Linux AMIs."
 msgstr ""
+"单个 PEX 文件可以支持多个平台和 Python 解释器，使其成为分发命令行工具等应用程序的一个有吸引力的选择。"
+"例如，这个功能允许在 OS X 笔记本和生产的 Linux AMI 上方便地使用同一个 PEX 文件。"
 
 #: ../../whatispex.rst:33
 msgid "How do .pex files work?"
-msgstr ""
+msgstr ".pex 文件是如何工作的？"
 
 #: ../../whatispex.rst:35
 msgid ""
@@ -71,6 +79,8 @@ msgid ""
 " module as an executable.  For example, ``python -m my_module`` or "
 "``python my_module`` will execute ``my_module/__main__.py`` if it exists."
 msgstr ""
+"PEX 文件依赖于 Python 导入器中的一个特性，它认为模块中存在一个 ``__main__.py`` 是将该模块作为可执行文件的信号。"
+"例如，``python -m my_module`` 或 ``python my_module`` 将执行 ``my_module/__main__.py``，如果它存在的话。"
 
 #: ../../whatispex.rst:40
 msgid ""
@@ -82,4 +92,6 @@ msgid ""
 "order to build executable .pex files.  This is described more thoroughly "
 "in `PEP 441 <https://www.python.org/dev/peps/pep-0441/>`_."
 msgstr ""
-
+"由于 Python 导入子系统的灵活性，``python -m my_module`` 不管 ``my_module`` 是在磁盘上还是在一个 zip 文件中，都可以工作。"
+"在包含 ``__main__.py`` 的 .zip 文件的顶部添加 ``#!/usr/bin/env python``，并标记为可执行，这将使它变成一个可执行的 Python 程序。"
+"pex 利用这一特性，以建立可执行的 .pex 文件。这在 `PEP 441 <https://www.python.org/dev/peps/pep-0441/>`_ 中有更详细的描述。"
