@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>What are .pex files? &#8212; pex 2.1.63 文档</title>
+    <title>什么是 .pex 文件？ &#8212; pex 2.1.63 文档</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/classic.css" />
     
@@ -34,7 +34,7 @@
           <a href="index.html" title="pex"
              accesskey="P">上一页</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">pex 2.1.63 文档</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">What are .pex files?</a></li> 
+        <li class="nav-item nav-item-this"><a href="">什么是 .pex 文件？</a></li> 
       </ul>
     </div>  
 
@@ -44,40 +44,21 @@
           <div class="body" role="main">
             
   <section id="what-are-pex-files">
-<span id="whatispex"></span><h1>What are .pex files?<a class="headerlink" href="#what-are-pex-files" title="永久链接至标题">¶</a></h1>
+<span id="whatispex"></span><h1>什么是 .pex 文件？<a class="headerlink" href="#what-are-pex-files" title="永久链接至标题">¶</a></h1>
 <section id="tl-dr">
 <h2>tl;dr<a class="headerlink" href="#tl-dr" title="永久链接至标题">¶</a></h2>
-<p>PEX files are self-contained executable Python virtual environments.  More
-specifically, they are carefully constructed zip files with a
-<code class="docutils literal notranslate"><span class="pre">#!/usr/bin/env</span> <span class="pre">python</span></code> and special <code class="docutils literal notranslate"><span class="pre">__main__.py</span></code> that allows you to interact
-with the PEX runtime.  For more information about zip applications,
-see <a class="reference external" href="https://www.python.org/dev/peps/pep-0441/">PEP 441</a>.</p>
-<p>To get started building your first pex files, go straight to <a class="reference internal" href="buildingpex.html#buildingpex"><span class="std std-ref">Building .pex files</span></a>.</p>
+<p>PEX 文件是独立的可执行的 Python 虚拟环境。 更确切地说，它们是精心构造的压缩文件，带有 <code class="docutils literal notranslate"><span class="pre">#!/usr/bin/env</span> <span class="pre">python</span></code> 和特殊的 <code class="docutils literal notranslate"><span class="pre">__main__.py</span></code>，允许你与 PEX 运行时交互。关于 zip 应用程序的更多信息，见 <a class="reference external" href="https://www.python.org/dev/peps/pep-0441/">PEP 441</a>。</p>
+<p>要开始建立你的第一个 pex 文件，请直接进入 <a class="reference internal" href="buildingpex.html#buildingpex"><span class="std std-ref">Building .pex files</span></a>。</p>
 </section>
 <section id="why-pex-files">
-<h2>Why .pex files?<a class="headerlink" href="#why-pex-files" title="永久链接至标题">¶</a></h2>
-<p>Files with the .pex extension – “PEX files” or “.pex files” – are
-self-contained executable Python virtual environments.  PEX files make it
-easy to deploy Python applications: the deployment process becomes simply
-<code class="docutils literal notranslate"><span class="pre">scp</span></code>.</p>
-<p>Single PEX files can support multiple platforms and python interpreters,
-making them an attractive option to distribute applications such as command
-line tools.  For example, this feature allows the convenient use of the same
-PEX file on both OS X laptops and production Linux AMIs.</p>
+<h2>为什么是 .pex 文件？<a class="headerlink" href="#why-pex-files" title="永久链接至标题">¶</a></h2>
+<p>带有 .pex 扩展名的文件 – （”PEX 文件” 或 “.pex 文件”） – 是独立的可执行的 Python 虚拟环境。PEX 文件使部署 Python 应用程序变得很容易：部署过程变得像 <code class="docutils literal notranslate"><span class="pre">scp</span></code> 那样简单。</p>
+<p>单个 PEX 文件可以支持多个平台和 Python 解释器，使其成为分发命令行工具等应用程序的一个有吸引力的选择。例如，这个功能允许在 OS X 笔记本和生产的 Linux AMI 上方便地使用同一个 PEX 文件。</p>
 </section>
 <section id="how-do-pex-files-work">
-<h2>How do .pex files work?<a class="headerlink" href="#how-do-pex-files-work" title="永久链接至标题">¶</a></h2>
-<p>PEX files rely on a feature in the Python importer that considers the presence
-of a <code class="docutils literal notranslate"><span class="pre">__main__.py</span></code> within the module as a signal to treat that module as
-an executable.  For example, <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">my_module</span></code> or <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">my_module</span></code>
-will execute <code class="docutils literal notranslate"><span class="pre">my_module/__main__.py</span></code> if it exists.</p>
-<p>Because of the flexibility of the Python import subsystem, <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span>
-<span class="pre">my_module</span></code> works regardless if <code class="docutils literal notranslate"><span class="pre">my_module</span></code> is on disk or within a zip
-file.  Adding <code class="docutils literal notranslate"><span class="pre">#!/usr/bin/env</span> <span class="pre">python</span></code> to the top of a .zip file containing
-a <code class="docutils literal notranslate"><span class="pre">__main__.py</span></code> and marking it executable will turn it into an
-executable Python program.  pex takes advantage of this feature in order to
-build executable .pex files.  This is described more thoroughly in
-<a class="reference external" href="https://www.python.org/dev/peps/pep-0441/">PEP 441</a>.</p>
+<h2>.pex 文件是如何工作的？<a class="headerlink" href="#how-do-pex-files-work" title="永久链接至标题">¶</a></h2>
+<p>PEX 文件依赖于 Python 导入器中的一个特性，它认为模块中存在一个 <code class="docutils literal notranslate"><span class="pre">__main__.py</span></code> 是将该模块作为可执行文件的信号。例如，<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">my_module</span></code> 或 <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">my_module</span></code> 将执行 <code class="docutils literal notranslate"><span class="pre">my_module/__main__.py</span></code>，如果它存在的话。</p>
+<p>由于 Python 导入子系统的灵活性，<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">my_module</span></code> 不管 <code class="docutils literal notranslate"><span class="pre">my_module</span></code> 是在磁盘上还是在一个 zip 文件中，都可以工作。在包含 <code class="docutils literal notranslate"><span class="pre">__main__.py</span></code> 的 .zip 文件的顶部添加 <code class="docutils literal notranslate"><span class="pre">#!/usr/bin/env</span> <span class="pre">python</span></code>，并标记为可执行，这将使它变成一个可执行的 Python 程序。pex 利用这一特性，以建立可执行的 .pex 文件。这在 <a class="reference external" href="https://www.python.org/dev/peps/pep-0441/">PEP 441</a> 中有更详细的描述。</p>
 </section>
 </section>
 
@@ -91,10 +72,10 @@ build executable .pex files.  This is described more thoroughly in
   <div>
     <h3><a href="index.html">目录</a></h3>
     <ul>
-<li><a class="reference internal" href="#">What are .pex files?</a><ul>
+<li><a class="reference internal" href="#">什么是 .pex 文件？</a><ul>
 <li><a class="reference internal" href="#tl-dr">tl;dr</a></li>
-<li><a class="reference internal" href="#why-pex-files">Why .pex files?</a></li>
-<li><a class="reference internal" href="#how-do-pex-files-work">How do .pex files work?</a></li>
+<li><a class="reference internal" href="#why-pex-files">为什么是 .pex 文件？</a></li>
+<li><a class="reference internal" href="#how-do-pex-files-work">.pex 文件是如何工作的？</a></li>
 </ul>
 </li>
 </ul>
@@ -144,7 +125,7 @@ build executable .pex files.  This is described more thoroughly in
           <a href="index.html" title="pex"
              >上一页</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">pex 2.1.63 文档</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">What are .pex files?</a></li> 
+        <li class="nav-item nav-item-this"><a href="">什么是 .pex 文件？</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
