@@ -1,0 +1,428 @@
+
+<!DOCTYPE html>
+
+<html lang="zh_CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>PEX runtime environment variables &#8212; pex 2.1.63 文档</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/translations.js"></script>
+    
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="搜索" href="../search.html" />
+    <link rel="prev" title="PEX Recipes and Notes" href="../recipes.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总目录"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="../recipes.html" title="PEX Recipes and Notes"
+             accesskey="P">上一页</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pex 2.1.63 文档</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">PEX runtime environment variables</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="pex-runtime-environment-variables">
+<h1>PEX runtime environment variables<a class="headerlink" href="#pex-runtime-environment-variables" title="永久链接至标题">¶</a></h1>
+<dl>
+<dt class="sig sig-object" id="PEX_ALWAYS_CACHE">
+<span class="pre">PEX_ALWAYS_CACHE</span><a class="headerlink" href="#PEX_ALWAYS_CACHE" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">Boolean.</div>
+<div class="line"><br /></div>
+<div class="line">        Deprecated: This env var is no longer used; all internally cached distributions in a PEX</div>
+<div class="line">        are always installed into the local Pex dependency cache.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_COVERAGE">
+<span class="pre">PEX_COVERAGE</span><a class="headerlink" href="#PEX_COVERAGE" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">Boolean.</div>
+<div class="line"><br /></div>
+<div class="line">        Enable coverage reporting for this PEX file.  This requires that the “coverage” module is</div>
+<div class="line">        available in the PEX environment.</div>
+<div class="line"><br /></div>
+<div class="line">        Default: false.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_COVERAGE_FILENAME">
+<span class="pre">PEX_COVERAGE_FILENAME</span><a class="headerlink" href="#PEX_COVERAGE_FILENAME" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">Filename.</div>
+<div class="line"><br /></div>
+<div class="line">        Write the coverage data to the specified filename.  If PEX_COVERAGE_FILENAME is not</div>
+<div class="line">        specified but PEX_COVERAGE is, coverage information will be printed to stdout and not saved.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_EMIT_WARNINGS">
+<span class="pre">PEX_EMIT_WARNINGS</span><a class="headerlink" href="#PEX_EMIT_WARNINGS" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">Boolean.</div>
+<div class="line"><br /></div>
+<div class="line">        Emit UserWarnings to stderr. When false, warnings will only be logged at PEX_VERBOSE &gt;= 1.</div>
+<div class="line">        When unset the build-time value of `–emit-warnings` will be used.</div>
+<div class="line"><br /></div>
+<div class="line">        Default: unset.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_EXTRA_SYS_PATH">
+<span class="pre">PEX_EXTRA_SYS_PATH</span><a class="headerlink" href="#PEX_EXTRA_SYS_PATH" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">String.</div>
+<div class="line"><br /></div>
+<div class="line">        A colon-separated string containing paths to add to the runtime sys.path.</div>
+<div class="line"><br /></div>
+<div class="line">        Should be used sparingly, e.g., if you know that code inside this PEX needs to</div>
+<div class="line">        interact with code outside it.</div>
+<div class="line"><br /></div>
+<div class="line">        Ex: “/path/to/lib1:/path/to/lib2”</div>
+<div class="line"><br /></div>
+<div class="line">        This is distinct from PEX_INHERIT_PATH, which controls how the interpreter’s</div>
+<div class="line">        existing sys.path (which you may not have control over) is scrubbed.</div>
+<div class="line"><br /></div>
+<div class="line">        See also PEX_PATH for how to merge packages from other pexes into the current environment.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_FORCE_LOCAL">
+<span class="pre">PEX_FORCE_LOCAL</span><a class="headerlink" href="#PEX_FORCE_LOCAL" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">Boolean.</div>
+<div class="line"><br /></div>
+<div class="line">        Deprecated: This env var is no longer used since user code is now always unzipped before</div>
+<div class="line">        execution.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_IGNORE_ERRORS">
+<span class="pre">PEX_IGNORE_ERRORS</span><a class="headerlink" href="#PEX_IGNORE_ERRORS" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">Boolean.</div>
+<div class="line"><br /></div>
+<div class="line">        Ignore any errors resolving dependencies when invoking the PEX file. This can be useful if</div>
+<div class="line">        you know that a particular failing dependency is not necessary to run the application.</div>
+<div class="line"><br /></div>
+<div class="line">        Default: false.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_IGNORE_RCFILES">
+<span class="pre">PEX_IGNORE_RCFILES</span><a class="headerlink" href="#PEX_IGNORE_RCFILES" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">Boolean.</div>
+<div class="line"><br /></div>
+<div class="line">        Explicitly disable the reading/parsing of pexrc files (~/.pexrc).</div>
+<div class="line"><br /></div>
+<div class="line">        Default: false.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_INHERIT_PATH">
+<span class="pre">PEX_INHERIT_PATH</span><a class="headerlink" href="#PEX_INHERIT_PATH" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">String (false|prefer|fallback)</div>
+<div class="line"><br /></div>
+<div class="line">        Allow inheriting packages from site-packages, user site-packages and the PYTHONPATH. By</div>
+<div class="line">        default, PEX scrubs any non stdlib packages from sys.path prior to invoking the application.</div>
+<div class="line">        Using ‘prefer’ causes PEX to shift any non-stdlib packages before the pex environment on</div>
+<div class="line">        sys.path and using ‘fallback’ shifts them after instead.</div>
+<div class="line"><br /></div>
+<div class="line">        Using this option is generally not advised, but can help in situations when certain</div>
+<div class="line">        dependencies do not conform to standard packaging practices and thus cannot be bundled into</div>
+<div class="line">        PEX files.</div>
+<div class="line"><br /></div>
+<div class="line">        See also PEX_EXTRA_SYS_PATH for how to *add* to the sys.path.</div>
+<div class="line"><br /></div>
+<div class="line">        Default: false.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_INTERPRETER">
+<span class="pre">PEX_INTERPRETER</span><a class="headerlink" href="#PEX_INTERPRETER" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">Boolean.</div>
+<div class="line"><br /></div>
+<div class="line">        Drop into a REPL instead of invoking the predefined entry point of this PEX. This can be</div>
+<div class="line">        useful for inspecting the PEX environment interactively.  It can also be used to treat the PEX</div>
+<div class="line">        file as an interpreter in order to execute other scripts in the context of the PEX file, e.g.</div>
+<div class="line">        “PEX_INTERPRETER=1 ./app.pex my_script.py”.  Equivalent to setting PEX_MODULE to empty.</div>
+<div class="line"><br /></div>
+<div class="line">        Default: false.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_MODULE">
+<span class="pre">PEX_MODULE</span><a class="headerlink" href="#PEX_MODULE" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">String.</div>
+<div class="line"><br /></div>
+<div class="line">        Override the entry point into the PEX file.  Can either be a module, e.g.</div>
+<div class="line">        ‘SimpleHTTPServer’, or a specific entry point in module:symbol form, e.g.  “myapp.bin:main”.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_PATH">
+<span class="pre">PEX_PATH</span><a class="headerlink" href="#PEX_PATH" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">A set of one or more PEX files.</div>
+<div class="line"><br /></div>
+<div class="line">        Merge the packages from other PEX files into the current environment.  This allows you to</div>
+<div class="line">        do things such as create a PEX file containing the “coverage” module or create PEX files</div>
+<div class="line">        containing plugin entry points to be consumed by a main application.  Paths should be</div>
+<div class="line">        specified in the same manner as $PATH, e.g. PEX_PATH=/path/to/pex1.pex:/path/to/pex2.pex</div>
+<div class="line">        and so forth.</div>
+<div class="line"><br /></div>
+<div class="line">        See also PEX_EXTRA_SYS_PATH for how to add arbitrary entries to the sys.path.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_PROFILE">
+<span class="pre">PEX_PROFILE</span><a class="headerlink" href="#PEX_PROFILE" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">Boolean.</div>
+<div class="line"><br /></div>
+<div class="line">        Enable application profiling.  If specified and PEX_PROFILE_FILENAME is not specified, PEX</div>
+<div class="line">        will print profiling information to stdout.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_PROFILE_FILENAME">
+<span class="pre">PEX_PROFILE_FILENAME</span><a class="headerlink" href="#PEX_PROFILE_FILENAME" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">Filename.</div>
+<div class="line"><br /></div>
+<div class="line">        Profile the application and dump a profile into the specified filename in the standard</div>
+<div class="line">        “profile” module format.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_PROFILE_SORT">
+<span class="pre">PEX_PROFILE_SORT</span><a class="headerlink" href="#PEX_PROFILE_SORT" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">String.</div>
+<div class="line"><br /></div>
+<div class="line">        Toggle the profile sorting algorithm used to print out profile columns.</div>
+<div class="line"><br /></div>
+<div class="line">        Default: ‘cumulative’.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_PYTHON">
+<span class="pre">PEX_PYTHON</span><a class="headerlink" href="#PEX_PYTHON" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">String.</div>
+<div class="line"><br /></div>
+<div class="line">        Override the Python interpreter used to invoke this PEX.  Can be either an absolute path to</div>
+<div class="line">        an interpreter or a base name e.g.  “python3.3”.  If a base name is provided, the $PATH will</div>
+<div class="line">        be searched for an appropriate match.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_PYTHON_PATH">
+<span class="pre">PEX_PYTHON_PATH</span><a class="headerlink" href="#PEX_PYTHON_PATH" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">String.</div>
+<div class="line"><br /></div>
+<div class="line">        A colon-separated string containing paths of blessed Python interpreters</div>
+<div class="line">        for overriding the Python interpreter used to invoke this PEX. Can be absolute paths to</div>
+<div class="line">        interpreters or standard $PATH style directory entries that are searched for child files that</div>
+<div class="line">        are python binaries.</div>
+<div class="line"><br /></div>
+<div class="line">        Ex: “/path/to/python27:/path/to/python36-distribution/bin”</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_ROOT">
+<span class="pre">PEX_ROOT</span><a class="headerlink" href="#PEX_ROOT" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">Directory.</div>
+<div class="line"><br /></div>
+<div class="line">        The directory location for PEX to cache any dependencies and code.  PEX must write not-zip-</div>
+<div class="line">        safe eggs and all wheels to disk in order to activate them.</div>
+<div class="line"><br /></div>
+<div class="line">        Default: ~/.pex</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_SCRIPT">
+<span class="pre">PEX_SCRIPT</span><a class="headerlink" href="#PEX_SCRIPT" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">String.</div>
+<div class="line"><br /></div>
+<div class="line">        The script name within the PEX environment to execute.  This must either be an entry point</div>
+<div class="line">        as defined in a distribution’s console_scripts, or a script as defined in a distribution’s</div>
+<div class="line">        scripts section.  While Python supports any script including shell scripts, PEX only</div>
+<div class="line">        supports invocation of Python scripts in this fashion.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_TEARDOWN_VERBOSE">
+<span class="pre">PEX_TEARDOWN_VERBOSE</span><a class="headerlink" href="#PEX_TEARDOWN_VERBOSE" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">Boolean.</div>
+<div class="line"><br /></div>
+<div class="line">        Enable verbosity for when the interpreter shuts down.  This is mostly only useful for</div>
+<div class="line">        debugging PEX itself.</div>
+<div class="line"><br /></div>
+<div class="line">        Default: false.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_TOOLS">
+<span class="pre">PEX_TOOLS</span><a class="headerlink" href="#PEX_TOOLS" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">Boolean.</div>
+<div class="line"><br /></div>
+<div class="line">        Run the PEX tools.</div>
+<div class="line"><br /></div>
+<div class="line">        Default: false.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_UNZIP">
+<span class="pre">PEX_UNZIP</span><a class="headerlink" href="#PEX_UNZIP" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">Boolean.</div>
+<div class="line"><br /></div>
+<div class="line">        Deprecated: This env var is no longer used since unzipping PEX zip files before execution</div>
+<div class="line">        is now the default.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_VENV">
+<span class="pre">PEX_VENV</span><a class="headerlink" href="#PEX_VENV" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">Boolean.</div>
+<div class="line"><br /></div>
+<div class="line">        Force this PEX to create a venv under $PEX_ROOT and re-execute from there.  If the pex file</div>
+<div class="line">        will be run multiple times under a stable $PEX_ROOT the venv creation will only be performed</div>
+<div class="line">        once and subsequent runs will enjoy lower startup latency.</div>
+<div class="line"><br /></div>
+<div class="line">        Default: false.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_VENV_BIN_PATH">
+<span class="pre">PEX_VENV_BIN_PATH</span><a class="headerlink" href="#PEX_VENV_BIN_PATH" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">String (false|prepend|append).</div>
+<div class="line"><br /></div>
+<div class="line">        When running in PEX_VENV mode, optionally add the scripts and console scripts of</div>
+<div class="line">        distributions in the PEX file to the $PATH.</div>
+<div class="line"><br /></div>
+<div class="line">        Default: false.</div>
+<div class="line">        </div>
+</p>
+<dl>
+<dt class="sig sig-object" id="PEX_VERBOSE">
+<span class="pre">PEX_VERBOSE</span><a class="headerlink" href="#PEX_VERBOSE" title="永久链接至目标">¶</a></dt>
+</dl>
+
+<p><div class="line">Integer.</div>
+<div class="line"><br /></div>
+<div class="line">        Set the verbosity level of PEX debug logging.  The higher the number, the more logging, with</div>
+<div class="line">        0 being disabled.  This environment variable can be extremely useful in debugging PEX</div>
+<div class="line">        environment issues.</div>
+<div class="line"><br /></div>
+<div class="line">        Default: 0</div>
+<div class="line">        </div>
+</p>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h4>上一个主题</h4>
+    <p class="topless"><a href="../recipes.html"
+                          title="上一章">PEX Recipes and Notes</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/api/vars.rst.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="总目录"
+             >索引</a></li>
+        <li class="right" >
+          <a href="../recipes.html" title="PEX Recipes and Notes"
+             >上一页</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pex 2.1.63 文档</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">PEX runtime environment variables</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; 版权所有 2022, Pants project contributors.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,197 @@
+
+<!DOCTYPE html>
+
+<html lang="zh_CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>PEX Recipes and Notes &#8212; pex 2.1.63 文档</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/translations.js"></script>
+    
+    <link rel="index" title="索引" href="genindex.html" />
+    <link rel="search" title="搜索" href="search.html" />
+    <link rel="next" title="PEX runtime environment variables" href="api/vars.html" />
+    <link rel="prev" title="Building .pex files" href="buildingpex.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="总目录"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="api/vars.html" title="PEX runtime environment variables"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="buildingpex.html" title="Building .pex files"
+             accesskey="P">上一页</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pex 2.1.63 文档</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">PEX Recipes and Notes</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="pex-recipes-and-notes">
+<span id="recipes"></span><h1>PEX Recipes and Notes<a class="headerlink" href="#pex-recipes-and-notes" title="永久链接至标题">¶</a></h1>
+<section id="pex-app-in-a-container">
+<h2>PEX app in a container<a class="headerlink" href="#pex-app-in-a-container" title="永久链接至标题">¶</a></h2>
+<p>If you want to use a PEX application in a container, you can get the smallest container footprint
+and the lowest latency application start-up by installing it with the <code class="docutils literal notranslate"><span class="pre">venv</span></code> Pex tool. First make
+sure you build the pex with <code class="docutils literal notranslate"><span class="pre">--include-tools</span></code> (or <code class="docutils literal notranslate"><span class="pre">--venv</span></code>), and then install it in the
+container like so:</p>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">COPY</span><span class="w"> </span>my.pex /my-app.pex
+<span class="k">RUN</span><span class="w"> </span><span class="nv">PEX_TOOLS</span><span class="o">=</span><span class="m">1</span> /mp-app.pex venv --rm all --compile /my-app
+<span class="k">ENTRYPOINT</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/mp-app/pex&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>The Pex <code class="docutils literal notranslate"><span class="pre">venv</span></code> tool will:</p>
+<ol class="arabic simple">
+<li><p>Install the PEX as a traditional venv at <code class="docutils literal notranslate"><span class="pre">/my-app</span></code> with a script at <code class="docutils literal notranslate"><span class="pre">/my-app/pex</span></code> that runs
+just like the original PEX.</p></li>
+<li><p>Pre-compile all PEX Python code installed in the venv.</p></li>
+<li><p>Remove the original <code class="docutils literal notranslate"><span class="pre">/my-app.pex</span></code> as well as any temporary caches created by Pex in the
+<code class="docutils literal notranslate"><span class="pre">PEX_ROOT</span></code>, leaving just the newly installed and pre-compiled <code class="docutils literal notranslate"><span class="pre">/my-app</span></code> venv.</p></li>
+</ol>
+</section>
+<section id="pex-aware-application">
+<h2>PEX-aware application<a class="headerlink" href="#pex-aware-application" title="永久链接至标题">¶</a></h2>
+<p>If your code benefits from knowing whether it is running from within a PEX or not, you can inspect
+the <code class="docutils literal notranslate"><span class="pre">PEX</span></code> environment variable. If it is set, it will be the absolute path of the PEX your code
+is running in. Normally this will be a PEX zip file, but it could be a directory path if the PEX was
+built with a <code class="docutils literal notranslate"><span class="pre">--layout</span></code> of <code class="docutils literal notranslate"><span class="pre">packed</span></code> or <code class="docutils literal notranslate"><span class="pre">loose</span></code>.</p>
+</section>
+<section id="gunicorn-and-pex">
+<h2>Gunicorn and PEX<a class="headerlink" href="#gunicorn-and-pex" title="永久链接至标题">¶</a></h2>
+<p>Normally, to run a wsgi-compatible application with Gunicorn, you’d just
+point Gunicorn at your application, tell Gunicorn how to run it, and you’re
+ready to go - but if your application is shipping as a PEX file, you’ll have
+to bundle Gunicorn as a dependency and set Gunicorn as your entry point. Gunicorn
+can’t enter a PEX file to retrieve the wsgi instance, but that doesn’t prevent
+the PEX from invoking Gunicorn.</p>
+<p>This retains the benefit of zero <cite>pip install</cite>’s to run your service, but it
+requires a bit more setup as you must ensure Gunicorn is packaged as a dependency.
+The following snippets assume Flask as the wsgi framework, Django setup should be
+similar:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ pex flask gunicorn myapp -c gunicorn -o ~/service.pex
+</pre></div>
+</div>
+<p>Once your pex file is created, you need to make sure to pass your wsgi app
+instance name to the CLI at runtime for Gunicorn to know how to hook into it,
+configuration can be passed in the same way:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ service.pex myapp:appinstance -c /path/to/gunicorn_config.py
+</pre></div>
+</div>
+<p>And there you have it, a fully portable python web service.</p>
+</section>
+<section id="pex-and-proxy-settings">
+<h2>PEX and Proxy settings<a class="headerlink" href="#pex-and-proxy-settings" title="永久链接至标题">¶</a></h2>
+<p>While building pex files, you may need to fetch dependencies through a proxy. The easiest way is to use pex cli with the requests extra and environment variables. Following are the steps to do just that:</p>
+<ol class="arabic simple">
+<li><p>Install pex with requests</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ pip install pex<span class="o">[</span>requests<span class="o">]</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="2">
+<li><p>Set the environment variables</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ <span class="c1"># Hopefully your proxy supports https! If not, you can export HTTP_PROXY:</span>
+$ <span class="c1"># export HTTP_PROXY=&#39;http://user:pass@address:port&#39;</span>
+$ <span class="nb">export</span> <span class="nv">HTTPS_PROXY</span><span class="o">=</span><span class="s1">&#39;https://user:pass@address:port&#39;</span>
+</pre></div>
+</div>
+<ol class="arabic simple" start="3">
+<li><p>Now you can test by running</p></li>
+</ol>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ pex -v pex
+</pre></div>
+</div>
+<p>For more information on the requests module support for proxies via environment variables, see the official documentation here: <a class="reference external" href="http://docs.python-requests.org/en/master/user/advanced/#proxies">http://docs.python-requests.org/en/master/user/advanced/#proxies</a>.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">PEX Recipes and Notes</a><ul>
+<li><a class="reference internal" href="#pex-app-in-a-container">PEX app in a container</a></li>
+<li><a class="reference internal" href="#pex-aware-application">PEX-aware application</a></li>
+<li><a class="reference internal" href="#gunicorn-and-pex">Gunicorn and PEX</a></li>
+<li><a class="reference internal" href="#pex-and-proxy-settings">PEX and Proxy settings</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一个主题</h4>
+    <p class="topless"><a href="buildingpex.html"
+                          title="上一章">Building .pex files</a></p>
+  </div>
+  <div>
+    <h4>下一个主题</h4>
+    <p class="topless"><a href="api/vars.html"
+                          title="下一章">PEX runtime environment variables</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/recipes.rst.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="总目录"
+             >索引</a></li>
+        <li class="right" >
+          <a href="api/vars.html" title="PEX runtime environment variables"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="buildingpex.html" title="Building .pex files"
+             >上一页</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pex 2.1.63 文档</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">PEX Recipes and Notes</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; 版权所有 2022, Pants project contributors.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+
+<html lang="zh_CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pex &#8212; pex 2.1.63 文档</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/translations.js"></script>
+    
+    <link rel="index" title="索引" href="genindex.html" />
+    <link rel="search" title="搜索" href="search.html" />
+    <link rel="next" title="What are .pex files?" href="whatispex.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="总目录"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="whatispex.html" title="What are .pex files?"
+             accesskey="N">下一页</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">pex 2.1.63 文档</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pex</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="pex">
+<h1>pex<a class="headerlink" href="#pex" title="永久链接至标题">¶</a></h1>
+<p>这个项目是 .pex 文件和能够创建它们的 <code class="docutils literal notranslate"><span class="pre">pex</span></code> 工具的家园。<code class="docutils literal notranslate"><span class="pre">pex</span></code> 还提供了一个类似于 <a class="reference external" href="http://virtualenv.org">virtualenv</a> 的通用 Python 环境虚拟化解决方案。pex 是 “Python Executable” 的缩写。</p>
+<section id="in-brief">
+<h2>简而言之<a class="headerlink" href="#in-brief" title="永久链接至标题">¶</a></h2>
+<p>要快速开始构建 .pex 文件，请直接进入 <a class="reference internal" href="buildingpex.html#buildingpex"><span class="std std-ref">Building .pex files</span></a>。初次接触 python 打包？请查看 <a class="reference external" href="https://packaging.python.org">packaging.python.org</a>。</p>
+</section>
+<section id="intro-history">
+<h2>简介和历史<a class="headerlink" href="#intro-history" title="永久链接至标题">¶</a></h2>
+<p>pex contains the Python packaging and distribution libraries originally available through the
+<a class="reference external" href="https://github.com/twitter/commons">twitter commons</a> but since split out into a separate project.
+The most notable components of pex are the .pex (Python EXecutable) format and the
+associated <code class="docutils literal notranslate"><span class="pre">pex</span></code> tool which provide a general purpose Python environment virtualization
+solution similar in spirit to <a class="reference external" href="http://virtualenv.org">virtualenv</a>.  PEX files have been used by Twitter to deploy Python applications to production since 2011.</p>
+<p>To learn more about what the .pex format is and why it could be useful for
+you, see <a class="reference internal" href="whatispex.html#whatispex"><span class="std std-ref">What are .pex files?</span></a>  For the impatient, there is also a (slightly outdated) lightning
+talk published by Twitter University: <a class="reference external" href="http://www.youtube.com/watch?v=NmpnGhRwsu0">WTF is PEX?</a>.
+To go straight to building pex files, see <a class="reference internal" href="buildingpex.html#buildingpex"><span class="std std-ref">Building .pex files</span></a>.</p>
+<p>Guide:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="whatispex.html">What are .pex files?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="whatispex.html#tl-dr">tl;dr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="whatispex.html#why-pex-files">Why .pex files?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="whatispex.html#how-do-pex-files-work">How do .pex files work?</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="buildingpex.html">Building .pex files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="buildingpex.html#invoking-the-pex-utility">Invoking the <code class="docutils literal notranslate"><span class="pre">pex</span></code> utility</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="buildingpex.html#specifying-requirements">Specifying requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="buildingpex.html#specifying-entry-points">Specifying entry points</a></li>
+<li class="toctree-l2"><a class="reference internal" href="buildingpex.html#saving-pex-files">Saving .pex files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="buildingpex.html#tailoring-requirement-resolution">Tailoring requirement resolution</a></li>
+<li class="toctree-l2"><a class="reference internal" href="buildingpex.html#tailoring-pex-execution-at-build-time">Tailoring PEX execution at build time</a></li>
+<li class="toctree-l2"><a class="reference internal" href="buildingpex.html#tailoring-pex-execution-at-runtime">Tailoring PEX execution at runtime</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="buildingpex.html#using-bdist-pex">Using <code class="docutils literal notranslate"><span class="pre">bdist_pex</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="buildingpex.html#bdist-pex"><code class="docutils literal notranslate"><span class="pre">bdist_pex</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="buildingpex.html#bdist-pex-bdist-all"><code class="docutils literal notranslate"><span class="pre">bdist_pex</span> <span class="pre">--bdist-all</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="buildingpex.html#using-pants">Using Pants</a></li>
+<li class="toctree-l1"><a class="reference internal" href="recipes.html">PEX Recipes and Notes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="recipes.html#pex-app-in-a-container">PEX app in a container</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipes.html#pex-aware-application">PEX-aware application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipes.html#gunicorn-and-pex">Gunicorn and PEX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="recipes.html#pex-and-proxy-settings">PEX and Proxy settings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api/vars.html">PEX runtime environment variables</a></li>
+</ul>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="#">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">pex</a><ul>
+<li><a class="reference internal" href="#in-brief">简而言之</a></li>
+<li><a class="reference internal" href="#intro-history">简介和历史</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>下一个主题</h4>
+    <p class="topless"><a href="whatispex.html"
+                          title="下一章">What are .pex files?</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="总目录"
+             >索引</a></li>
+        <li class="right" >
+          <a href="whatispex.html" title="What are .pex files?"
+             >下一页</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">pex 2.1.63 文档</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pex</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; 版权所有 2022, Pants project contributors.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+    </div>
+  </body>
+</html>

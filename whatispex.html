@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+
+<html lang="zh_CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>What are .pex files? &#8212; pex 2.1.63 文档</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/translations.js"></script>
+    
+    <link rel="index" title="索引" href="genindex.html" />
+    <link rel="search" title="搜索" href="search.html" />
+    <link rel="next" title="Building .pex files" href="buildingpex.html" />
+    <link rel="prev" title="pex" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="总目录"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="buildingpex.html" title="Building .pex files"
+             accesskey="N">下一页</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="pex"
+             accesskey="P">上一页</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pex 2.1.63 文档</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">What are .pex files?</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="what-are-pex-files">
+<span id="whatispex"></span><h1>What are .pex files?<a class="headerlink" href="#what-are-pex-files" title="永久链接至标题">¶</a></h1>
+<section id="tl-dr">
+<h2>tl;dr<a class="headerlink" href="#tl-dr" title="永久链接至标题">¶</a></h2>
+<p>PEX files are self-contained executable Python virtual environments.  More
+specifically, they are carefully constructed zip files with a
+<code class="docutils literal notranslate"><span class="pre">#!/usr/bin/env</span> <span class="pre">python</span></code> and special <code class="docutils literal notranslate"><span class="pre">__main__.py</span></code> that allows you to interact
+with the PEX runtime.  For more information about zip applications,
+see <a class="reference external" href="https://www.python.org/dev/peps/pep-0441/">PEP 441</a>.</p>
+<p>To get started building your first pex files, go straight to <a class="reference internal" href="buildingpex.html#buildingpex"><span class="std std-ref">Building .pex files</span></a>.</p>
+</section>
+<section id="why-pex-files">
+<h2>Why .pex files?<a class="headerlink" href="#why-pex-files" title="永久链接至标题">¶</a></h2>
+<p>Files with the .pex extension – “PEX files” or “.pex files” – are
+self-contained executable Python virtual environments.  PEX files make it
+easy to deploy Python applications: the deployment process becomes simply
+<code class="docutils literal notranslate"><span class="pre">scp</span></code>.</p>
+<p>Single PEX files can support multiple platforms and python interpreters,
+making them an attractive option to distribute applications such as command
+line tools.  For example, this feature allows the convenient use of the same
+PEX file on both OS X laptops and production Linux AMIs.</p>
+</section>
+<section id="how-do-pex-files-work">
+<h2>How do .pex files work?<a class="headerlink" href="#how-do-pex-files-work" title="永久链接至标题">¶</a></h2>
+<p>PEX files rely on a feature in the Python importer that considers the presence
+of a <code class="docutils literal notranslate"><span class="pre">__main__.py</span></code> within the module as a signal to treat that module as
+an executable.  For example, <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">my_module</span></code> or <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">my_module</span></code>
+will execute <code class="docutils literal notranslate"><span class="pre">my_module/__main__.py</span></code> if it exists.</p>
+<p>Because of the flexibility of the Python import subsystem, <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span>
+<span class="pre">my_module</span></code> works regardless if <code class="docutils literal notranslate"><span class="pre">my_module</span></code> is on disk or within a zip
+file.  Adding <code class="docutils literal notranslate"><span class="pre">#!/usr/bin/env</span> <span class="pre">python</span></code> to the top of a .zip file containing
+a <code class="docutils literal notranslate"><span class="pre">__main__.py</span></code> and marking it executable will turn it into an
+executable Python program.  pex takes advantage of this feature in order to
+build executable .pex files.  This is described more thoroughly in
+<a class="reference external" href="https://www.python.org/dev/peps/pep-0441/">PEP 441</a>.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">目录</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">What are .pex files?</a><ul>
+<li><a class="reference internal" href="#tl-dr">tl;dr</a></li>
+<li><a class="reference internal" href="#why-pex-files">Why .pex files?</a></li>
+<li><a class="reference internal" href="#how-do-pex-files-work">How do .pex files work?</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>上一个主题</h4>
+    <p class="topless"><a href="index.html"
+                          title="上一章">pex</a></p>
+  </div>
+  <div>
+    <h4>下一个主题</h4>
+    <p class="topless"><a href="buildingpex.html"
+                          title="下一章">Building .pex files</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/whatispex.rst.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">快速搜索</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="转向" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>导航</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="总目录"
+             >索引</a></li>
+        <li class="right" >
+          <a href="buildingpex.html" title="Building .pex files"
+             >下一页</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="pex"
+             >上一页</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pex 2.1.63 文档</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">What are .pex files?</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; 版权所有 2022, Pants project contributors.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+    </div>
+  </body>
+</html>
