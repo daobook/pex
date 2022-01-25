@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Building .pex files &#8212; pex 2.1.63 文档</title>
+    <title>构建 .pex 文件 &#8212; pex 2.1.63 文档</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/classic.css" />
     
@@ -34,7 +34,7 @@
           <a href="whatispex.html" title="什么是 .pex 文件？"
              accesskey="P">上一页</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">pex 2.1.63 文档</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Building .pex files</a></li> 
+        <li class="nav-item nav-item-this"><a href="">构建 .pex 文件</a></li> 
       </ul>
     </div>  
 
@@ -44,30 +44,24 @@
           <div class="body" role="main">
             
   <section id="building-pex-files">
-<span id="buildingpex"></span><h1>Building .pex files<a class="headerlink" href="#building-pex-files" title="永久链接至标题">¶</a></h1>
-<p>You can build .pex files using the <code class="docutils literal notranslate"><span class="pre">pex</span></code> utility, which is made available when you <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pex</span></code>.
-Do this within a virtualenv, then you can use pex to bootstrap itself:</p>
+<span id="buildingpex"></span><h1>构建 .pex 文件<a class="headerlink" href="#building-pex-files" title="永久链接至标题">¶</a></h1>
+<p>你可以使用 <code class="docutils literal notranslate"><span class="pre">pex</span></code> 工具建立 .pex 文件，该工具在你 <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pex</span></code> 时可用。在 virtualenv 中这样做，然后你可以使用 pex 来启动自己：</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pex pex requests -c pex -o ~/bin/pex
 </pre></div>
 </div>
-<p>This command creates a pex file containing pex and requests, using the
-console script named “pex”, saving it in ~/bin/pex.  At this point, assuming
-~/bin is on your $PATH, then you can use pex in or outside of any
-virtualenv.</p>
-<p>The second easiest way to build .pex files is using the <code class="docutils literal notranslate"><span class="pre">bdist_pex</span></code> setuptools command
-which is available if you <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pex</span></code>.  For example, to clone and build pip from source:</p>
+<p>这个命令创建了一个包含 pex 和 requests 的 pex 文件，使用名为 “pex” 的控制台脚本，将其保存在 ~/bin/pex。在这一点上，假设 ~/bin 在你的 $PATH 上，那么你可以在任何 virtualenv 内或外使用 pex。</p>
+<p>构建 .pex 文件的第二个最简单的方法是使用 <code class="docutils literal notranslate"><span class="pre">bdist_pex</span></code> setuptools 命令，如果你 <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">pex</span></code> 就可以使用。例如，从源代码克隆和构建 pip：</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git clone https://github.com/pypa/pip <span class="o">&amp;&amp;</span> <span class="nb">cd</span> pip
 <span class="gp">$ </span>python setup.py bdist_pex
 <span class="go">running bdist_pex</span>
 <span class="go">Writing pip to dist/pip-7.2.0.dev0.pex</span>
 </pre></div>
 </div>
-<p>Both are described in more detail below.</p>
+<p>下面对这两种情况进行了更详细的描述。</p>
 </section>
 <section id="invoking-the-pex-utility">
-<h1>Invoking the <code class="docutils literal notranslate"><span class="pre">pex</span></code> utility<a class="headerlink" href="#invoking-the-pex-utility" title="永久链接至标题">¶</a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">pex</span></code> utility has no required arguments and by default will construct an empty environment
-and invoke it.  When no entry point is specified, “invocation” means starting an interpreter:</p>
+<h1>调用 <code class="docutils literal notranslate"><span class="pre">pex</span></code> 工具<a class="headerlink" href="#invoking-the-pex-utility" title="永久链接至标题">¶</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">pex</span></code> 工具没有必要的参数，默认情况下会构建一个空环境并调用它。当没有指定入口点时，”invocation” 意味着启动一个解释器：</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pex
 <span class="go">Python 3.6.2 (default, Jul 20 2017, 03:52:27)</span>
 <span class="go">[GCC 7.1.1 20170630] on linux</span>
@@ -76,10 +70,8 @@ and invoke it.  When no entry point is specified, “invocation” means startin
 <span class="go">&gt;&gt;&gt;</span>
 </pre></div>
 </div>
-<p>This creates an ephemeral environment that only exists for the duration of the <code class="docutils literal notranslate"><span class="pre">pex</span></code> command invocation
-and is garbage collected immediately on exit.</p>
-<p>You can tailor which interpreter is used by specifying <code class="docutils literal notranslate"><span class="pre">--python=PATH</span></code>.  PATH can be either the
-absolute path of a Python binary or the name of a Python interpreter within the environment, e.g.:</p>
+<p>这创建了一个短暂的环境，只存在于 <code class="docutils literal notranslate"><span class="pre">pex</span></code> 命令调用的时间内，并在退出时立即被垃圾回收。</p>
+<p>你可以通过指定 <code class="docutils literal notranslate"><span class="pre">--python=PATH</span></code> 来定制使用哪个解释器。PATH 可以是 Python 二进制文件的绝对路径，也可以是环境中 Python 解释器的名称，例如</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pex
 <span class="go">Python 3.6.2 (default, Jul 20 2017, 03:52:27)</span>
 <span class="go">[GCC 7.1.1 20170630] on linux</span>
@@ -101,11 +93,8 @@ absolute path of a Python binary or the name of a Python interpreter within the 
 </pre></div>
 </div>
 <section id="specifying-requirements">
-<h2>Specifying requirements<a class="headerlink" href="#specifying-requirements" title="永久链接至标题">¶</a></h2>
-<p>Requirements are specified using the same form as expected by <code class="docutils literal notranslate"><span class="pre">pip</span></code> and <code class="docutils literal notranslate"><span class="pre">setuptools</span></code>, e.g.
-<code class="docutils literal notranslate"><span class="pre">flask</span></code>, <code class="docutils literal notranslate"><span class="pre">setuptools==2.1.2</span></code>, <code class="docutils literal notranslate"><span class="pre">Django&gt;=1.4,&lt;1.6</span></code>.  These are specified as arguments to pex
-and any number (including 0) may be specified.  For example, to start an environment with <code class="docutils literal notranslate"><span class="pre">flask</span></code>
-and <code class="docutils literal notranslate"><span class="pre">psutil&gt;1</span></code>:</p>
+<h2>指定要求<a class="headerlink" href="#specifying-requirements" title="永久链接至标题">¶</a></h2>
+<p>要求使用与 <code class="docutils literal notranslate"><span class="pre">pip</span></code> 和 <code class="docutils literal notranslate"><span class="pre">setuptools</span></code> 预期相同的形式来指定，例如 <code class="docutils literal notranslate"><span class="pre">flask</span></code>，<code class="docutils literal notranslate"><span class="pre">setuptools==2.1.2</span></code>，<code class="docutils literal notranslate"><span class="pre">Django&gt;=1.4,&lt;1.6</span></code>。这些被指定为 pex 的参数，可以指定任何数字（包括 0）。例如，要启动一个带有 <code class="docutils literal notranslate"><span class="pre">flask</span></code> 和 <code class="docutils literal notranslate"><span class="pre">psutil&gt;1</span></code> 的环境：</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pex flask <span class="s1">&#39;psutil&gt;1&#39;</span>
 <span class="go">Python 3.6.2 (default, Jul 20 2017, 03:52:27)</span>
 <span class="go">[GCC 7.1.1 20170630] on linux</span>
@@ -114,28 +103,27 @@ and <code class="docutils literal notranslate"><span class="pre">psutil&gt;1</sp
 <span class="go">&gt;&gt;&gt;</span>
 </pre></div>
 </div>
-<p>You can then import and manipulate modules like you would otherwise:</p>
+<p>然后你可以像其他方式一样导入和操作模块：</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">&gt;&gt;&gt; import flask</span>
 <span class="go">&gt;&gt;&gt; import psutil</span>
 <span class="go">&gt;&gt;&gt; ...</span>
 </pre></div>
 </div>
-<p>Conveniently, the output of <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">freeze</span></code> (a list of pinned dependencies) can be passed directly to <code class="docutils literal notranslate"><span class="pre">pex</span></code>. This provides a handy way to freeze a virtualenv into a PEX file.</p>
+<p>方便的是，<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">freeze</span></code> 的输出（一个被钉住的依赖列表）可以直接传递给 <code class="docutils literal notranslate"><span class="pre">pex</span></code>。这提供了一个方便的方法，可以将虚拟环境冻结到 PEX 文件中。</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pex <span class="k">$(</span>pip freeze<span class="k">)</span> -o my_application.pex
 </pre></div>
 </div>
-<p>A <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> file may also be used, just as with <code class="docutils literal notranslate"><span class="pre">pip</span></code>.</p>
+<p>也可以使用 <code class="docutils literal notranslate"><span class="pre">requirements.txt</span></code> 文件，就像使用 <code class="docutils literal notranslate"><span class="pre">pip</span></code> 一样。</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pex -r requirements.txt -o my_application.pex
 </pre></div>
 </div>
 </section>
 <section id="specifying-entry-points">
-<h2>Specifying entry points<a class="headerlink" href="#specifying-entry-points" title="永久链接至标题">¶</a></h2>
-<p>Entry points define how the environment is executed and may be specified in one of three ways.</p>
+<h2>指定入口点<a class="headerlink" href="#specifying-entry-points" title="永久链接至标题">¶</a></h2>
+<p>入口点定义了环境的执行方式，可以用三种方式之一来指定。</p>
 <section id="pex-options-script-py">
 <h3>pex &lt;options&gt; – script.py<a class="headerlink" href="#pex-options-script-py" title="永久链接至标题">¶</a></h3>
-<p>As mentioned above, if no entry points are specified, the default behavior is to emulate an
-interpreter.  First we create a simple flask application:</p>
+<p>如上所述，如果没有指定入口点，默认行为是模拟一个解释器。首先我们创建一个简单的 flask 应用程序：</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>cat &lt;&lt;EOF &gt; flask_hello_world.py
 <span class="go">&gt; from flask import Flask</span>
 <span class="go">&gt; app = Flask(__name__)</span>
@@ -148,7 +136,7 @@ interpreter.  First we create a simple flask application:</p>
 <span class="go">&gt; EOF</span>
 </pre></div>
 </div>
-<p>Then, like an interpreter, if a source file is specified as a parameter to pex, it is invoked:</p>
+<p>然后，像一个解释器一样，如果一个源文件被指定为 pex 的参数，它就会被调用：</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pex flask -- ./flask_hello_world.py
 <span class="go">* Running on http://127.0.0.1:5000/</span>
 </pre></div>
@@ -156,9 +144,7 @@ interpreter.  First we create a simple flask application:</p>
 </section>
 <section id="pex-m">
 <h3>pex -m<a class="headerlink" href="#pex-m" title="永久链接至标题">¶</a></h3>
-<p>Your code may be within the PEX file or it may be some predetermined entry point
-within the standard library.  <code class="docutils literal notranslate"><span class="pre">pex</span> <span class="pre">-m</span></code> behaves very similarly to <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span></code>.  Consider
-<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pydoc</span></code>:</p>
+<p>你的代码可能在 PEX 文件中，也可能是标准库中的某个预定的入口点。<code class="docutils literal notranslate"><span class="pre">pex</span> <span class="pre">-m</span></code> 的行为与 <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span></code> 非常相似。考虑一下 <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pydoc</span></code>：</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python -m pydoc
 <span class="go">pydoc - the Python documentation tool</span>
 
@@ -169,7 +155,7 @@ within the standard library.  <code class="docutils literal notranslate"><span c
 <span class="go">    ...</span>
 </pre></div>
 </div>
-<p>This can be emulated using the <code class="docutils literal notranslate"><span class="pre">pex</span></code> tool using <code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">pydoc</span></code>:</p>
+<p>这可以用 <code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">pydoc</span></code> 的 <code class="docutils literal notranslate"><span class="pre">pex</span></code> 工具来模拟。</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pex -m pydoc
 <span class="go">pydoc - the Python documentation tool</span>
 
@@ -180,8 +166,7 @@ within the standard library.  <code class="docutils literal notranslate"><span c
 <span class="go">    ...</span>
 </pre></div>
 </div>
-<p>Arguments will be passed unescaped following <code class="docutils literal notranslate"><span class="pre">--</span></code> on the command line.  So in order to
-get pydoc help on the <code class="docutils literal notranslate"><span class="pre">flask.app</span></code> package in Flask:</p>
+<p>参数将在命令行的 <code class="docutils literal notranslate"><span class="pre">--</span></code> 后面不加转义地传递。 因此，为了在 Flask 中的 <code class="docutils literal notranslate"><span class="pre">flask.app</span></code> 包上获得 pydoc 帮助：</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pex flask -m pydoc -- flask.app
 
 <span class="go">Help on module flask.app in flask:</span>
@@ -197,12 +182,9 @@ get pydoc help on the <code class="docutils literal notranslate"><span class="pr
 <span class="go">    ~~~~~~~~~</span>
 </pre></div>
 </div>
-<p>and so forth.</p>
-<p>Entry points can also take the form <code class="docutils literal notranslate"><span class="pre">package:target</span></code>, such as <code class="docutils literal notranslate"><span class="pre">sphinx:main</span></code> or
-<code class="docutils literal notranslate"><span class="pre">fabric.main:main</span></code> for Sphinx and Fabric respectively.  This is roughly equivalent to running a
-script that does <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">sys,</span> <span class="pre">from</span> <span class="pre">package</span> <span class="pre">import</span> <span class="pre">target;</span> <span class="pre">sys.exit(target())</span></code>.</p>
-<p>This can be a powerful way to invoke Python applications without ever having to <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code>
-anything, for example a one-off invocation of Sphinx with the readthedocs theme available:</p>
+<p>诸如此类。</p>
+<p>入口点也可以采取 <code class="docutils literal notranslate"><span class="pre">package:target</span></code> 的形式，比如 <code class="docutils literal notranslate"><span class="pre">sphinx:main</span></code> 或 <code class="docutils literal notranslate"><span class="pre">fabric.main:main</span></code> 分别代表 Sphinx 和 Fabric。这大致相当于运行一个脚本，做 <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">sys,</span> <span class="pre">from</span> <span class="pre">package</span> <span class="pre">import</span> <span class="pre">target;</span> <span class="pre">sys.exit(target())</span></code>。</p>
+<p>这可能是调用 Python 应用程序的一种强大方式，而不需要 <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> 任何东西，例如一次性调用 Sphinx 的 readthedocs 主题可用：</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pex <span class="nv">sphinx</span><span class="o">==</span><span class="m">1</span>.2.2 sphinx_rtd_theme -e sphinx:main -- --help
 <span class="go">Sphinx v1.2.2</span>
 <span class="go">Usage: /tmp/tmpydcp6kox [options] sourcedir outdir [filenames...]</span>
@@ -215,17 +197,12 @@ anything, for example a one-off invocation of Sphinx with the readthedocs theme 
 <span class="go">...</span>
 </pre></div>
 </div>
-<p>Although sys.exit is applied blindly to the return value of the target function, this probably does
-what you want due to very flexible <code class="docutils literal notranslate"><span class="pre">sys.exit</span></code> semantics. Consult your target function and
-<a class="reference external" href="https://docs.python.org/library/sys.html#sys.exit">sys.exit</a> documentation to be sure.</p>
-<p>Almost certainly better and more stable, you can alternatively specify a console script exported by
-the app as explained below.</p>
+<p>尽管 sys.exit 被盲目地应用于目标函数的返回值，但由于 <code class="docutils literal notranslate"><span class="pre">sys.exit</span></code> 语义非常灵活，这可能会达到你想要的效果。请咨询你的目标函数和 <a class="reference external" href="https://docs.python.org/library/sys.html#sys.exit">sys.exit</a> 文档以确定。</p>
+<p>几乎可以肯定的是，你可以选择指定一个由应用程序导出的控制台脚本，如下文所述。</p>
 </section>
 <section id="pex-c">
 <h3>pex -c<a class="headerlink" href="#pex-c" title="永久链接至标题">¶</a></h3>
-<p>If you don’t know the <code class="docutils literal notranslate"><span class="pre">package:target</span></code> for the console scripts of your favorite python packages,
-pex allows you to use <code class="docutils literal notranslate"><span class="pre">-c</span></code> to specify a console script as defined by the distribution. For
-example, Fabric provides the <code class="docutils literal notranslate"><span class="pre">fab</span></code> tool when pip installed:</p>
+<p>如果你不知道你喜欢的 python 包的控制台脚本的 <code class="docutils literal notranslate"><span class="pre">package:target</span></code>，pex 允许你使用 <code class="docutils literal notranslate"><span class="pre">-c</span></code> 来指定一个由发行版定义的控制台脚本。例如，Fabric 在 pip 安装时提供了 <code class="docutils literal notranslate"><span class="pre">fab</span></code> 工具：</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pex Fabric -c fab -- --help
 <span class="go">Fatal error: Couldn&#39;t find any fabfiles!</span>
 
@@ -234,7 +211,7 @@ example, Fabric provides the <code class="docutils literal notranslate"><span cl
 <span class="go">Aborting.</span>
 </pre></div>
 </div>
-<p>Even scripts defined by the “scripts” section of a distribution can be used, e.g. with boto:</p>
+<p>即使是由发行版的 “scripts” 部分定义的脚本也可以使用，例如，用 boto：</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pex boto -c mturk
 <span class="go">usage: mturk [-h] [-P] [--nicknames PATH]</span>
 <span class="go">             {bal,hit,hits,new,extend,expire,rm,as,approve,reject,unreject,bonus,notify,give-qual,revoke-qual}</span>
@@ -242,30 +219,22 @@ example, Fabric provides the <code class="docutils literal notranslate"><span cl
 <span class="go">mturk: error: too few arguments</span>
 </pre></div>
 </div>
-<p>Note: If you run <code class="docutils literal notranslate"><span class="pre">pex</span> <span class="pre">-c</span></code> and come across an error similar to
-<code class="docutils literal notranslate"><span class="pre">pex.pex_builder.InvalidExecutableSpecification:</span> <span class="pre">Could</span> <span class="pre">not</span> <span class="pre">find</span> <span class="pre">script</span> <span class="pre">'mainscript.py'</span> <span class="pre">in</span> <span class="pre">any</span> <span class="pre">distribution</span> <span class="pre">within</span> <span class="pre">PEX!</span></code>,
-double-check your setup.py and ensure that <code class="docutils literal notranslate"><span class="pre">mainscript.py</span></code> is included
-in your setup’s <code class="docutils literal notranslate"><span class="pre">scripts</span></code> array. If you are using <code class="docutils literal notranslate"><span class="pre">console_scripts</span></code> and
-run into this error, double check your <code class="docutils literal notranslate"><span class="pre">console_scripts</span></code> syntax - further
-information for both <code class="docutils literal notranslate"><span class="pre">scripts</span></code> and <code class="docutils literal notranslate"><span class="pre">console_scripts</span></code> can be found in the
-<a class="reference external" href="https://python-packaging.readthedocs.io/en/latest/command-line-scripts.html">Python packaging documentation</a>.</p>
+<p>注意：如果你运行 <code class="docutils literal notranslate"><span class="pre">pex</span> <span class="pre">-c</span></code>，遇到类似 <code class="docutils literal notranslate"><span class="pre">pex.pex_builder.InvalidExecutableSpecification:</span> <span class="pre">Could</span> <span class="pre">not</span> <span class="pre">find</span> <span class="pre">script</span> <span class="pre">'mainscript.py'</span> <span class="pre">in</span> <span class="pre">any</span> <span class="pre">distribution</span> <span class="pre">within</span> <span class="pre">PEX!</span></code> 这样的错误，请仔细检查你的 setup.py，确保 <code class="docutils literal notranslate"><span class="pre">mainscript.py</span></code> 包含在你的 setup 的 <code class="docutils literal notranslate"><span class="pre">scripts</span></code> 阵列中。如果你使用 <code class="docutils literal notranslate"><span class="pre">console_scripts</span></code> 并遇到这个错误，请仔细检查你的 <code class="docutils literal notranslate"><span class="pre">console_scripts</span></code> 语法 - 关于 <code class="docutils literal notranslate"><span class="pre">scripts</span></code> 和 <code class="docutils literal notranslate"><span class="pre">console_scripts</span></code> 的进一步信息可以在 <a class="reference external" href="https://python-packaging.readthedocs.io/en/latest/command-line-scripts.html">Python 打包文档</a> 中找到。</p>
 </section>
 </section>
 <section id="saving-pex-files">
-<h2>Saving .pex files<a class="headerlink" href="#saving-pex-files" title="永久链接至标题">¶</a></h2>
-<p>Each of the commands above have been manipulating ephemeral PEX environments – environments that only
-exist for the duration of the pex command lifetime and immediately garbage collected.</p>
-<p>If the <code class="docutils literal notranslate"><span class="pre">-o</span> <span class="pre">PATH</span></code> option is specified, a PEX file of the environment is saved to disk at <code class="docutils literal notranslate"><span class="pre">PATH</span></code>.  For example
-we can package a standalone Sphinx as above:</p>
+<h2>保存 .pex 文件<a class="headerlink" href="#saving-pex-files" title="永久链接至标题">¶</a></h2>
+<p>上面的每个命令都在操纵短暂的 PEX 环境–这些环境只在 pex 命令的有效期内存在，并立即被垃圾回收。</p>
+<p>如果指定了 <code class="docutils literal notranslate"><span class="pre">-o</span> <span class="pre">PATH</span></code> 选项，环境的 PEX 文件就会保存在磁盘的 <code class="docutils literal notranslate"><span class="pre">PATH</span></code> 处。例如，我们可以像上面那样打包一个独立的 Sphinx：</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pex sphinx sphinx_rtd_theme -c sphinx -o sphinx.pex
 </pre></div>
 </div>
-<p>Instead of executing the environment, it is saved to disk:</p>
+<p>而不是执行环境，它被保存到磁盘：</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>ls -l sphinx.pex
 <span class="go">-rwxr-xr-x  1 wickman  wheel  4988494 Mar 11 17:48 sphinx.pex</span>
 </pre></div>
 </div>
-<p>This is an executable environment and can be executed as before:</p>
+<p>这是一个可执行的环境，可以像以前一样执行：</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>./sphinx.pex --help
 <span class="go">Sphinx v1.2.2</span>
 <span class="go">Usage: ./sphinx.pex [options] sourcedir outdir [filenames...]</span>
@@ -278,9 +247,7 @@ we can package a standalone Sphinx as above:</p>
 <span class="go">...</span>
 </pre></div>
 </div>
-<p>As before, entry points are not required, and if not specified the PEX will default to just dropping into
-an interpreter.  If an alternate interpreter is specified with <code class="docutils literal notranslate"><span class="pre">--python</span></code>, e.g. pypy, it will be the
-default hashbang in the PEX file:</p>
+<p>和以前一样，进入点不是必须的，如果没有指定，PEX 将默认为直接进入一个解释器。如果用 <code class="docutils literal notranslate"><span class="pre">--python</span></code> 指定了另一个解释器，例如 pypy，它将成为 PEX 文件中默认的 hashbang：</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>pex --python<span class="o">=</span>pypy flask -o flask-pypy.pex
 </pre></div>
 </div>
@@ -426,16 +393,16 @@ scary like <code class="docutils literal notranslate"><span class="pre">sudo</sp
   <div>
     <h3><a href="index.html">目录</a></h3>
     <ul>
-<li><a class="reference internal" href="#">Building .pex files</a></li>
-<li><a class="reference internal" href="#invoking-the-pex-utility">Invoking the <code class="docutils literal notranslate"><span class="pre">pex</span></code> utility</a><ul>
-<li><a class="reference internal" href="#specifying-requirements">Specifying requirements</a></li>
-<li><a class="reference internal" href="#specifying-entry-points">Specifying entry points</a><ul>
+<li><a class="reference internal" href="#">构建 .pex 文件</a></li>
+<li><a class="reference internal" href="#invoking-the-pex-utility">调用 <code class="docutils literal notranslate"><span class="pre">pex</span></code> 工具</a><ul>
+<li><a class="reference internal" href="#specifying-requirements">指定要求</a></li>
+<li><a class="reference internal" href="#specifying-entry-points">指定入口点</a><ul>
 <li><a class="reference internal" href="#pex-options-script-py">pex &lt;options&gt; – script.py</a></li>
 <li><a class="reference internal" href="#pex-m">pex -m</a></li>
 <li><a class="reference internal" href="#pex-c">pex -c</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#saving-pex-files">Saving .pex files</a></li>
+<li><a class="reference internal" href="#saving-pex-files">保存 .pex 文件</a></li>
 <li><a class="reference internal" href="#tailoring-requirement-resolution">Tailoring requirement resolution</a></li>
 <li><a class="reference internal" href="#tailoring-pex-execution-at-build-time">Tailoring PEX execution at build time</a><ul>
 <li><a class="reference internal" href="#zip-safe-not-zip-safe"><code class="docutils literal notranslate"><span class="pre">--zip-safe</span></code>/<code class="docutils literal notranslate"><span class="pre">--not-zip-safe</span></code></a></li>
@@ -501,7 +468,7 @@ scary like <code class="docutils literal notranslate"><span class="pre">sudo</sp
           <a href="whatispex.html" title="什么是 .pex 文件？"
              >上一页</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">pex 2.1.63 文档</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Building .pex files</a></li> 
+        <li class="nav-item nav-item-this"><a href="">构建 .pex 文件</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

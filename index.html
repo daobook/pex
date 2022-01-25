@@ -44,12 +44,12 @@
 <p>这个项目是 .pex 文件和能够创建它们的 <code class="docutils literal notranslate"><span class="pre">pex</span></code> 工具的家园。<code class="docutils literal notranslate"><span class="pre">pex</span></code> 还提供了一个类似于 <a class="reference external" href="http://virtualenv.org">virtualenv</a> 的通用 Python 环境虚拟化解决方案。pex 是 “Python Executable” 的缩写。</p>
 <section id="in-brief">
 <h2>简而言之<a class="headerlink" href="#in-brief" title="永久链接至标题">¶</a></h2>
-<p>要快速开始构建 .pex 文件，请直接进入 <a class="reference internal" href="buildingpex.html#buildingpex"><span class="std std-ref">Building .pex files</span></a>。初次接触 python 打包？请查看 <a class="reference external" href="https://packaging.python.org">packaging.python.org</a>。</p>
+<p>要快速开始构建 .pex 文件，请直接进入 <a class="reference internal" href="buildingpex.html#buildingpex"><span class="std std-ref">构建 .pex 文件</span></a>。初次接触 python 打包？请查看 <a class="reference external" href="https://packaging.python.org">packaging.python.org</a>。</p>
 </section>
 <section id="intro-history">
 <h2>简介和历史<a class="headerlink" href="#intro-history" title="永久链接至标题">¶</a></h2>
 <p>pex 包含了 Python 打包和发布库，最初是通过 <a class="reference external" href="https://github.com/twitter/commons">twitter commons</a> 提供的，但后来被分割成一个单独的项目。pex 最显著的组成部分是 .pex (Python EXecutable) 格式和相关的 <code class="docutils literal notranslate"><span class="pre">pex</span></code> 工具，它提供了一个通用的 Python 环境虚拟化解决方案，其精神类似于 <a class="reference external" href="http://virtualenv.org">virtualenv</a>。自 2011 年以来，PEX 文件一直被 Twitter 用于将 Python 应用程序部署到生产中。</p>
-<p>要了解更多关于 .pex 格式是什么以及为什么它可能对你有用，请参见 <a class="reference internal" href="whatispex.html#whatispex"><span class="std std-ref">什么是 .pex 文件？</span></a> 对于没有耐心的人，还有一个由 Twitter 大学发布的闪电讲座（稍有过时）：<a class="reference external" href="http://www.youtube.com/watch?v=NmpnGhRwsu0">WTF is PEX?</a>。要直接建立pex文件，请看 <a class="reference internal" href="buildingpex.html#buildingpex"><span class="std std-ref">Building .pex files</span></a>。</p>
+<p>要了解更多关于 .pex 格式是什么以及为什么它可能对你有用，请参见 <a class="reference internal" href="whatispex.html#whatispex"><span class="std std-ref">什么是 .pex 文件？</span></a> 对于没有耐心的人，还有一个由 Twitter 大学发布的闪电讲座（稍有过时）：<a class="reference external" href="http://www.youtube.com/watch?v=NmpnGhRwsu0">WTF is PEX?</a>。要直接建立pex文件，请看 <a class="reference internal" href="buildingpex.html#buildingpex"><span class="std std-ref">构建 .pex 文件</span></a>。</p>
 <p>指南</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -59,11 +59,11 @@
 <li class="toctree-l2"><a class="reference internal" href="whatispex.html#how-do-pex-files-work">.pex 文件是如何工作的？</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="buildingpex.html">Building .pex files</a></li>
-<li class="toctree-l1"><a class="reference internal" href="buildingpex.html#invoking-the-pex-utility">Invoking the <code class="docutils literal notranslate"><span class="pre">pex</span></code> utility</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="buildingpex.html#specifying-requirements">Specifying requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="buildingpex.html#specifying-entry-points">Specifying entry points</a></li>
-<li class="toctree-l2"><a class="reference internal" href="buildingpex.html#saving-pex-files">Saving .pex files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="buildingpex.html">构建 .pex 文件</a></li>
+<li class="toctree-l1"><a class="reference internal" href="buildingpex.html#invoking-the-pex-utility">调用 <code class="docutils literal notranslate"><span class="pre">pex</span></code> 工具</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="buildingpex.html#specifying-requirements">指定要求</a></li>
+<li class="toctree-l2"><a class="reference internal" href="buildingpex.html#specifying-entry-points">指定入口点</a></li>
+<li class="toctree-l2"><a class="reference internal" href="buildingpex.html#saving-pex-files">保存 .pex 文件</a></li>
 <li class="toctree-l2"><a class="reference internal" href="buildingpex.html#tailoring-requirement-resolution">Tailoring requirement resolution</a></li>
 <li class="toctree-l2"><a class="reference internal" href="buildingpex.html#tailoring-pex-execution-at-build-time">Tailoring PEX execution at build time</a></li>
 <li class="toctree-l2"><a class="reference internal" href="buildingpex.html#tailoring-pex-execution-at-runtime">Tailoring PEX execution at runtime</a></li>
