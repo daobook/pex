@@ -181,8 +181,7 @@ class Lockfile(object):
         :return: The selected locks.
         """
         for target in targets:
-            lock = self._select(target)
-            if lock:
+            if lock := self._select(target):
                 yield target, lock
 
     def _select(self, target):

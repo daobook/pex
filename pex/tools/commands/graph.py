@@ -69,13 +69,14 @@ class Graph(OutputMixin, PEXCommand):
                     start=dist.project_name,
                     end=req.project_name,
                     label="{specifier}{marker}".format(
-                        specifier=req.specifier if req.specifier else "",
+                        specifier=req.specifier or "",
                         marker="; {}".format(req.marker) if req.marker else "",
                     )
                     if (req.specifier or req.marker)
                     else None,
                     fontsize="10",
                 )
+
         return graph
 
     @classmethod

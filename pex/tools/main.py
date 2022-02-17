@@ -42,11 +42,7 @@ class PexTools(Main[PEXCommand]):
 
         pex_prog_path = simplify_pex_path(pex.path()) if pex else None
 
-        # By default, let argparse derive prog from sys.argv[0].
-        prog = None  # type: Optional[str]
-        if pex:
-            prog = "PEX_TOOLS=1 {pex_path}".format(pex_path=pex_prog_path)
-
+        prog = "PEX_TOOLS=1 {pex_path}".format(pex_path=pex_prog_path) if pex else None
         description = "Tools for working with {}.".format(pex_prog_path if pex else "PEX files")
         subparsers_description = (
             "{} can be operated on using any of the following subcommands.".format(

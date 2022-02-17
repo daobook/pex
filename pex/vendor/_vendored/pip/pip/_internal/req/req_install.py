@@ -172,9 +172,9 @@ class InstallRequirement(object):
         # Set to True after successful installation
         self.install_succeeded = None  # type: Optional[bool]
         # Supplied options
-        self.install_options = install_options if install_options else []
-        self.global_options = global_options if global_options else []
-        self.hash_options = hash_options if hash_options else {}
+        self.install_options = install_options or []
+        self.global_options = global_options or []
+        self.hash_options = hash_options or {}
         # Set to True after successful preparation of this requirement
         self.prepared = False
         # User supplied requirement are explicitly requested for installation
@@ -339,7 +339,7 @@ class InstallRequirement(object):
             else:
                 comes_from = self.comes_from.from_path()
             if comes_from:
-                s += '->' + comes_from
+                s += f'->{comes_from}'
         return s
 
     def ensure_build_location(self, build_dir, autodelete, parallel_builds):
@@ -437,34 +437,38 @@ class InstallRequirement(object):
         existing_version = existing_dist.parsed_version
         if not self.req.specifier.contains(existing_version, prereleases=True):
             self.satisfied_by = None
-            if use_user_site:
-                if dist_in_usersite(existing_dist):
-                    self.should_reinstall = True
-                elif (running_under_virtualenv() and
-                        dist_in_site_packages(existing_dist)):
-                    raise InstallationError(
-                        "Will not install to the user site because it will "
-                        "lack sys.path precedence to {} in {}".format(
-                            existing_dist.project_name, existing_dist.location)
-                    )
-            else:
+            if (
+                use_user_site
+                and dist_in_usersite(existing_dist)
+                or not use_user_site
+            ):
                 self.should_reinstall = True
+            elif (
+                use_user_site
+                and not dist_in_usersite(existing_dist)
+                and (
+                    running_under_virtualenv()
+                    and dist_in_site_packages(existing_dist)
+                )
+            ):
+                raise InstallationError(
+                    "Will not install to the user site because it will "
+                    "lack sys.path precedence to {} in {}".format(
+                        existing_dist.project_name, existing_dist.location)
+                )
+        elif self.editable:
+            self.should_reinstall = True
+            # when installing editables, nothing pre-existing should ever
+            # satisfy
+            self.satisfied_by = None
         else:
-            if self.editable:
-                self.should_reinstall = True
-                # when installing editables, nothing pre-existing should ever
-                # satisfy
-                self.satisfied_by = None
-            else:
-                self.satisfied_by = existing_dist
+            self.satisfied_by = existing_dist
 
     # Things valid for wheels
     @property
     def is_wheel(self):
         # type: () -> bool
-        if not self.link:
-            return False
-        return self.link.is_wheel
+        return False if not self.link else self.link.is_wheel
 
     # Things valid for sdists
     @property
@@ -634,8 +638,7 @@ class InstallRequirement(object):
         assert '+' in self.link.url, \
             "bad url: {self.link.url!r}".format(**locals())
         vc_type, url = self.link.url.split('+', 1)
-        vcs_backend = vcs.get_backend(vc_type)
-        if vcs_backend:
+        if vcs_backend := vcs.get_backend(vc_type):
             if not self.link.is_vcs:
                 reason = (
                     "This form of VCS requirement is being deprecated: {}."
@@ -754,7 +757,7 @@ class InstallRequirement(object):
                     dir_arcname = self._get_archive_name(
                         dirname, parentdir=dirpath, rootdir=dir,
                     )
-                    zipdir = zipfile.ZipInfo(dir_arcname + '/')
+                    zipdir = zipfile.ZipInfo(f'{dir_arcname}/')
                     zipdir.external_attr = 0x1ED << 16  # 0o755
                     zip_output.writestr(zipdir, '')
                 for filename in filenames:

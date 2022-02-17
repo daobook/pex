@@ -68,15 +68,14 @@ class TargetConfiguration(object):
                 def to_python_interpreter(full_path_or_basename):
                     if os.path.isfile(full_path_or_basename):
                         return PythonInterpreter.from_binary(full_path_or_basename)
-                    else:
-                        interp = PythonInterpreter.from_env(
-                            full_path_or_basename, paths=parse_path(pex_python_path)
+                    interp = PythonInterpreter.from_env(
+                        full_path_or_basename, paths=parse_path(pex_python_path)
+                    )
+                    if interp is None:
+                        raise InterpreterNotFound(
+                            "Failed to find interpreter: {}".format(full_path_or_basename)
                         )
-                        if interp is None:
-                            raise InterpreterNotFound(
-                                "Failed to find interpreter: {}".format(full_path_or_basename)
-                            )
-                        return interp
+                    return interp
 
                 interpreters.update(to_python_interpreter(interp) for interp in self.pythons)
 

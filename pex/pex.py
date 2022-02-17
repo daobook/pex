@@ -115,8 +115,7 @@ class PEX(object):  # noqa: T000
     def resolve(self):
         # type: () -> Iterator[Distribution]
         for env in self._loaded_envs:
-            for dist in env.resolve():
-                yield dist
+            yield from env.resolve()
 
     def _activate(self):
         # type: () -> Iterable[Distribution]
@@ -163,8 +162,7 @@ class PEX(object):  # noqa: T000
         sitedirs = cls._get_site_packages()
         for pth_path in cls._scan_pth_files(sitedirs):
             TRACER.log("Found .pth file: %s" % pth_path, V=3)
-            for extras_path in iter_pth_paths(pth_path):
-                yield extras_path
+            yield from iter_pth_paths(pth_path)
 
     @staticmethod
     def _scan_pth_files(dir_paths):
@@ -200,7 +198,7 @@ class PEX(object):  # noqa: T000
         # On windows getsitepackages() returns the python stdlib too.
         if sys.prefix in site_libs:
             site_libs.remove(sys.prefix)
-        real_site_libs = set(os.path.realpath(path) for path in site_libs)
+        real_site_libs = {os.path.realpath(path) for path in site_libs}
         return site_libs | real_site_libs
 
     @classmethod
@@ -286,8 +284,8 @@ class PEX(object):  # noqa: T000
             # type: (Optional[str]) -> Iterable[str]
             if path is None:
                 return ()
-            locations = set(dist.location for dist in find_distributions(path))
-            return {path} | locations | set(os.path.realpath(path) for path in locations)
+            locations = {dist.location for dist in find_distributions(path)}
+            return {path} | locations | {os.path.realpath(path) for path in locations}
 
         for path_element in sys.path:
             if cls._tainted_path(path_element, site_libs):
@@ -360,7 +358,7 @@ class PEX(object):  # noqa: T000
         for extras_path in cls._extras_paths():
             TRACER.log("Found site extra: %s" % extras_path)
             site_libs.add(extras_path)
-        site_libs = set(os.path.normpath(path) for path in site_libs)
+        site_libs = {os.path.normpath(path) for path in site_libs}
 
         sys_path, sys_path_importer_cache = cls.minimum_sys_path(site_libs, inherit_path)
         sys_modules = cls.minimum_sys_modules(site_libs)
@@ -564,9 +562,7 @@ class PEX(object):  # noqa: T000
         log("  * - paths that do not exist or will be imported via zipimport")
 
     def execute_interpreter(self):
-        # type: () -> Any
-        args = sys.argv[1:]
-        if args:
+        if args := sys.argv[1:]:
             # NB: We take care here to setup sys.argv to match how CPython does it for each case.
             arg = args[0]
             if arg == "-c":
@@ -612,8 +608,7 @@ class PEX(object):  # noqa: T000
             return "Could not find script {!r} in pex!".format(script_name)
 
         TRACER.log("Found script {!r} in {!r}.".format(script_name, dist_script.dist))
-        ast = dist_script.python_script()
-        if ast:
+        if ast := dist_script.python_script():
             return self.execute_ast(
                 dist_script.path, dist_script.read_contents(), argv0=script_name
             )

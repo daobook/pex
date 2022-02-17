@@ -202,11 +202,7 @@ def get_file_url(
             link, download_dir, hashes
         )
 
-    if already_downloaded_path:
-        from_path = already_downloaded_path
-    else:
-        from_path = link.file_path
-
+    from_path = already_downloaded_path or link.file_path
     # If --require-hashes is off, `hashes` is either empty, the
     # link's embedded hash, or MissingHashes; it is required to
     # match. If --require-hashes is on, we are satisfied by any
@@ -520,10 +516,9 @@ class RequirementPreparer(object):
         if local_file:
             req.local_file_path = local_file.path
 
-        dist = _get_prepared_distribution(
+        return _get_prepared_distribution(
             req, self.req_tracker, self.finder, self.build_isolation,
         )
-        return dist
 
     def save_linked_requirement(self, req):
         # type: (InstallRequirement) -> None

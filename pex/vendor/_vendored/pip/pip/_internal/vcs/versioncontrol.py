@@ -150,10 +150,7 @@ class RevOptions(object):
     @property
     def arg_rev(self):
         # type: () -> Optional[str]
-        if self.rev is None:
-            return self.vc_class.default_arg_rev
-
-        return self.rev
+        return self.vc_class.default_arg_rev if self.rev is None else self.rev
 
     def to_args(self):
         # type: () -> CommandArgs
@@ -170,10 +167,7 @@ class RevOptions(object):
 
     def to_display(self):
         # type: () -> str
-        if not self.rev:
-            return ''
-
-        return ' (to revision {})'.format(self.rev)
+        return '' if not self.rev else ' (to revision {})'.format(self.rev)
 
     def make_new(self, rev):
         # type: (str) -> RevOptions
@@ -266,10 +260,14 @@ class VcsSupport(object):
         """
         Return a VersionControl object or None.
         """
-        for vcs_backend in self._registry.values():
-            if scheme in vcs_backend.schemes:
-                return vcs_backend
-        return None
+        return next(
+            (
+                vcs_backend
+                for vcs_backend in self._registry.values()
+                if scheme in vcs_backend.schemes
+            ),
+            None,
+        )
 
     def get_backend(self, name):
         # type: (str) -> Optional[VersionControl]
@@ -342,10 +340,8 @@ class VersionControl(object):
 
         revision = cls.get_requirement_revision(repo_dir)
         subdir = cls.get_subdirectory(repo_dir)
-        req = make_vcs_requirement_url(repo_url, revision, project_name,
+        return make_vcs_requirement_url(repo_url, revision, project_name,
                                        subdir=subdir)
-
-        return req
 
     @staticmethod
     def get_base_rev_args(rev):
@@ -471,9 +467,7 @@ class VersionControl(object):
         """
         secret_url, rev, user_pass = self.get_url_rev_and_auth(url.secret)
         username, secret_password = user_pass
-        password = None  # type: Optional[HiddenText]
-        if secret_password is not None:
-            password = hide_value(secret_password)
+        password = hide_value(secret_password) if secret_password is not None else None
         extra_args = self.make_rev_args(username, password)
         rev_options = self.make_rev_options(rev, extra_args=extra_args)
 
@@ -730,6 +724,4 @@ class VersionControl(object):
         This can do more than is_repository_directory() alone. For
         example, the Git override checks that Git is actually available.
         """
-        if cls.is_repository_directory(location):
-            return location
-        return None
+        return location if cls.is_repository_directory(location) else None

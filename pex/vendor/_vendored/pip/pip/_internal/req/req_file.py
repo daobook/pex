@@ -194,26 +194,26 @@ def handle_requirement_line(
             comes_from=line_comes_from,
             constraint=line.constraint,
         )
-    else:
-        if options:
-            # Disable wheels if the user has specified build options
-            cmdoptions.check_install_build_global(options, line.opts)
+    if options:
+        # Disable wheels if the user has specified build options
+        cmdoptions.check_install_build_global(options, line.opts)
 
         # get the options that apply to requirements
-        req_options = {}
-        for dest in SUPPORTED_OPTIONS_REQ_DEST:
-            if dest in line.opts.__dict__ and line.opts.__dict__[dest]:
-                req_options[dest] = line.opts.__dict__[dest]
+    req_options = {
+        dest: line.opts.__dict__[dest]
+        for dest in SUPPORTED_OPTIONS_REQ_DEST
+        if dest in line.opts.__dict__ and line.opts.__dict__[dest]
+    }
 
-        line_source = 'line {} of {}'.format(line.lineno, line.filename)
-        return ParsedRequirement(
-            requirement=line.requirement,
-            is_editable=line.is_editable,
-            comes_from=line_comes_from,
-            constraint=line.constraint,
-            options=req_options,
-            line_source=line_source,
-        )
+    line_source = 'line {} of {}'.format(line.lineno, line.filename)
+    return ParsedRequirement(
+        requirement=line.requirement,
+        is_editable=line.is_editable,
+        comes_from=line_comes_from,
+        constraint=line.constraint,
+        options=req_options,
+        line_source=line_source,
+    )
 
 
 def handle_option_line(
@@ -310,18 +310,16 @@ def handle_line(
     """
 
     if line.is_requirement:
-        parsed_req = handle_requirement_line(line, options)
-        return parsed_req
-    else:
-        handle_option_line(
-            line.opts,
-            line.filename,
-            line.lineno,
-            finder,
-            options,
-            session,
-        )
-        return None
+        return handle_requirement_line(line, options)
+    handle_option_line(
+        line.opts,
+        line.filename,
+        line.lineno,
+        finder,
+        options,
+        session,
+    )
+    return None
 
 
 class RequirementsFileParser(object):
@@ -338,8 +336,7 @@ class RequirementsFileParser(object):
         # type: (str, bool) -> Iterator[ParsedLine]
         """Parse a given file, yielding parsed lines.
         """
-        for line in self._parse_and_recurse(filename, constraint):
-            yield line
+        yield from self._parse_and_recurse(filename, constraint)
 
     def _parse_and_recurse(self, filename, constraint):
         # type: (str, bool) -> Iterator[ParsedLine]
@@ -367,10 +364,9 @@ class RequirementsFileParser(object):
                         os.path.dirname(filename), req_path,
                     )
 
-                for inner_line in self._parse_and_recurse(
+                yield from self._parse_and_recurse(
                     req_path, nested_constraint,
-                ):
-                    yield inner_line
+                )
             else:
                 yield line
 
@@ -436,9 +432,8 @@ def break_args_options(line):
     for token in tokens:
         if token.startswith('-') or token.startswith('--'):
             break
-        else:
-            args.append(token)
-            options.pop(0)
+        args.append(token)
+        options.pop(0)
     return ' '.join(args), ' '.join(options)  # type: ignore
 
 
@@ -483,7 +478,7 @@ def join_lines(lines_enum):
         if not line.endswith('\\') or COMMENT_RE.match(line):
             if COMMENT_RE.match(line):
                 # this ensures comments are always matched later
-                line = ' ' + line
+                line = f' {line}'
             if new_line:
                 new_line.append(line)
                 assert primary_line_number is not None
@@ -511,8 +506,7 @@ def ignore_comments(lines_enum):
     """
     for line_number, line in lines_enum:
         line = COMMENT_RE.sub('', line)
-        line = line.strip()
-        if line:
+        if line := line.strip():
             yield line_number, line
 
 

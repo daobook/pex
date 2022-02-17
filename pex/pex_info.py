@@ -107,7 +107,7 @@ class PexInfo(object):
             "ignore_errors": Variables.PEX_IGNORE_ERRORS.strip_default(env),
         }
         # Filter out empty entries not explicitly set in the environment.
-        return cls(info=dict((k, v) for (k, v) in pex_info.items() if v is not None))
+        return cls(info={k: v for (k, v) in pex_info.items() if v is not None})
 
     @classmethod
     def _parse_requirement_tuple(cls, requirement_tuple):

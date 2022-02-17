@@ -135,12 +135,10 @@ def show_tags(options):
     target_python = make_target_python(options)
     tags = target_python.get_tags()
 
-    # Display the target options that were explicitly provided.
-    formatted_target = target_python.format_given()
-    suffix = ''
-    if formatted_target:
+    if formatted_target := target_python.format_given():
         suffix = ' (target: {})'.format(formatted_target)
-
+    else:
+        suffix = ''
     msg = 'Compatible tags: {}{}'.format(len(tags), suffix)
     logger.info(msg)
 
@@ -164,10 +162,7 @@ def show_tags(options):
 
 def ca_bundle_info(config):
     # type: (Configuration) -> str
-    levels = set()
-    for key, _ in config.items():
-        levels.add(key.split('.')[0])
-
+    levels = {key.split('.')[0] for key, _ in config.items()}
     if not levels:
         return "Not specified"
 

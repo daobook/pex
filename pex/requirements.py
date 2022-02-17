@@ -186,7 +186,7 @@ def parse_requirement_from_project_name_and_specifier(
         specifier=specifier or SpecifierSet(),
     )
     if marker:
-        requirement_string += ";" + str(marker)
+        requirement_string += f';{str(marker)}'
     return Requirement.parse(requirement_string)
 
 
@@ -310,8 +310,7 @@ def _parse_non_local_scheme(scheme):
     if not match:
         return None
 
-    archive_scheme = match.group("archive_scheme")
-    if archive_scheme:
+    if archive_scheme := match.group("archive_scheme"):
         return cast(ArchiveScheme.Value, ArchiveScheme.for_value(archive_scheme))
 
     return VCSScheme(vcs=VCS.for_value(match.group("vcs_type")), scheme=match.group("vcs_scheme"))
@@ -465,9 +464,7 @@ def _parse_requirement_line(
     project_name, direct_reference_url = _split_direct_references(processed_text)
     parsed_url = urlparse.urlparse(direct_reference_url or processed_text)
 
-    # Handle non local URLs.
-    non_local_scheme = _parse_non_local_scheme(parsed_url.scheme)
-    if non_local_scheme:
+    if non_local_scheme := _parse_non_local_scheme(parsed_url.scheme):
         project_name_extras_and_marker = _try_parse_fragment_project_name_and_marker(
             parsed_url.fragment
         )
@@ -633,13 +630,12 @@ def parse_requirements(
             if requirement_file or constraint_file:
                 relpath = _get_parameter(logical_line)
                 with source.resolve(
-                    line=logical_line,
-                    origin=relpath,
-                    is_constraints=constraint_file,
-                    fetcher=fetcher,
-                ) as other_source:
-                    for requirement in parse_requirements(other_source, fetcher=fetcher):
-                        yield requirement
+                                    line=logical_line,
+                                    origin=relpath,
+                                    is_constraints=constraint_file,
+                                    fetcher=fetcher,
+                                ) as other_source:
+                    yield from parse_requirements(other_source, fetcher=fetcher)
                 continue
 
             # Skip empty lines, comment lines and all other Pip options.

@@ -15,15 +15,11 @@ else:
 
 if "__PEX_UNVENDORED__" in __import__("os").environ:
   from pyparsing import ZeroOrMore, Group, Forward, QuotedString  # vendor:skip
+  from pyparsing import Literal as L  # vendor:skip
 else:
   from pex.third_party.pyparsing import ZeroOrMore, Group, Forward, QuotedString
 
-if "__PEX_UNVENDORED__" in __import__("os").environ:
-  from pyparsing import Literal as L  # vendor:skip
-else:
   from pex.third_party.pyparsing import Literal as L
-  # noqa
-
 from ._compat import string_types
 from ._typing import TYPE_CHECKING
 from .specifiers import Specifier, InvalidSpecifier
@@ -47,14 +43,10 @@ class InvalidMarker(ValueError):
     """
     An invalid marker was found, users should refer to PEP 508.
     """
-
-
 class UndefinedComparison(ValueError):
     """
     An invalid operation was attempted on a value that doesn't support it.
     """
-
-
 class UndefinedEnvironmentName(ValueError):
     """
     A name was attempted to be used that does not exist inside of the
@@ -164,31 +156,28 @@ def _coerce_parse_result(results):
 
 
 def _format_marker(marker, first=True):
-    # type: (Union[List[str], Tuple[Node, ...], str], Optional[bool]) -> str
+  # type: (Union[List[str], Tuple[Node, ...], str], Optional[bool]) -> str
 
-    assert isinstance(marker, (list, tuple, string_types))
+  assert isinstance(marker, (list, tuple, string_types))
 
-    # Sometimes we have a structure like [[...]] which is a single item list
-    # where the single item is itself it's own list. In that case we want skip
-    # the rest of this function so that we don't get extraneous () on the
-    # outside.
-    if (
-        isinstance(marker, list)
-        and len(marker) == 1
-        and isinstance(marker[0], (list, tuple))
-    ):
-        return _format_marker(marker[0])
+  # Sometimes we have a structure like [[...]] which is a single item list
+  # where the single item is itself it's own list. In that case we want skip
+  # the rest of this function so that we don't get extraneous () on the
+  # outside.
+  if (
+      isinstance(marker, list)
+      and len(marker) == 1
+      and isinstance(marker[0], (list, tuple))
+  ):
+      return _format_marker(marker[0])
 
-    if isinstance(marker, list):
-        inner = (_format_marker(m, first=False) for m in marker)
-        if first:
-            return " ".join(inner)
-        else:
-            return "(" + " ".join(inner) + ")"
-    elif isinstance(marker, tuple):
-        return " ".join([m.serialize() for m in marker])
-    else:
-        return marker
+  if isinstance(marker, list):
+    inner = (_format_marker(m, first=False) for m in marker)
+    return " ".join(inner) if first else "(" + " ".join(inner) + ")"
+  elif isinstance(marker, tuple):
+      return " ".join([m.serialize() for m in marker])
+  else:
+    return marker
 
 
 _operators = {

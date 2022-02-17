@@ -31,7 +31,7 @@ def direct_url_as_pep440_direct_reference(direct_url, name):
     # type: (DirectUrl, str) -> str
     """Convert a DirectUrl to a pip requirement string."""
     direct_url.validate()  # if invalid, this is a pip bug
-    requirement = name + " @ "
+    requirement = f'{name} @ '
     fragments = []
     if isinstance(direct_url.info, VcsInfo):
         requirement += "{}+{}@{}".format(
@@ -45,7 +45,7 @@ def direct_url_as_pep440_direct_reference(direct_url, name):
         assert isinstance(direct_url.info, DirInfo)
         requirement += direct_url.url
     if direct_url.subdirectory:
-        fragments.append("subdirectory=" + direct_url.subdirectory)
+        fragments.append(f'subdirectory={direct_url.subdirectory}')
     if fragments:
         requirement += "#" + "&".join(fragments)
     return requirement
@@ -91,8 +91,7 @@ def direct_url_from_link(link, source_dir=None, link_is_in_wheel_cache=False):
         )
     else:
         hash = None
-        hash_name = link.hash_name
-        if hash_name:
+        if hash_name := link.hash_name:
             hash = "{}={}".format(hash_name, link.hash)
         return DirectUrl(
             url=link.url_without_fragment,

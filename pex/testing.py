@@ -90,7 +90,7 @@ def get_dep_dist_names_from_pex(pex_path, match_prefix=""):
     """Given an on-disk pex, extract all of the unique first-level paths under `.deps`."""
     with open_zip(pex_path) as pex_zip:
         dep_gen = (f.split(os.sep)[1] for f in pex_zip.namelist() if f.startswith(".deps/"))
-        return set(item for item in dep_gen if item.startswith(match_prefix))
+        return {item for item in dep_gen if item.startswith(match_prefix)}
 
 
 @contextlib.contextmanager
@@ -519,15 +519,12 @@ def ensure_python_venv(version, latest_pip=True, system_site_packages=False):
     venv = safe_mkdtemp()
     if version in _ALL_PY3_VERSIONS:
         args = [python, "-m", "venv", venv]
-        if system_site_packages:
-            args.append("--system-site-packages")
-        subprocess.check_call(args=args)
     else:
         subprocess.check_call(args=[pip, "install", "virtualenv==16.7.10"])
         args = [python, "-m", "virtualenv", venv, "-q"]
-        if system_site_packages:
-            args.append("--system-site-packages")
-        subprocess.check_call(args=args)
+    if system_site_packages:
+        args.append("--system-site-packages")
+    subprocess.check_call(args=args)
     python, pip = tuple(os.path.join(venv, "bin", exe) for exe in ("python", "pip"))
     if latest_pip:
         subprocess.check_call(args=[pip, "install", "-U", "pip"])

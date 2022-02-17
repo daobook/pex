@@ -59,11 +59,12 @@ class Hashes(object):
             return other
 
         # Otherwise only hashes that present in both objects are allowed.
-        new = {}
-        for alg, values in iteritems(other._allowed):
-            if alg not in self._allowed:
-                continue
-            new[alg] = [v for v in values if v in self._allowed[alg]]
+        new = {
+            alg: [v for v in values if v in self._allowed[alg]]
+            for alg, values in iteritems(other._allowed)
+            if alg in self._allowed
+        }
+
         return Hashes(new)
 
     @property

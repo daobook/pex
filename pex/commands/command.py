@@ -162,9 +162,10 @@ def try_open_file(
     # type: (...) -> Result
     opener, url = (
         ("xdg-open", "https://www.freedesktop.org/wiki/Software/xdg-utils/")
-        if "Linux" == os.uname()[0]
+        if os.uname()[0] == "Linux"
         else ("open", None)
     )
+
     with open(os.devnull, "wb") as devnull:
         return try_run_program(opener, [path], url=url, error=error, stdout=devnull)
 
@@ -237,8 +238,7 @@ class OutputMixin(object):
     ):
         # type: (...) -> Iterator[IO]
         if cls.is_stdout(options):
-            stdout = getattr(sys.stdout, "buffer", sys.stdout) if binary else sys.stdout
-            yield stdout
+            yield getattr(sys.stdout, "buffer", sys.stdout) if binary else sys.stdout
         else:
             with safe_open(options.output, mode="wb" if binary else "w") as out:
                 yield out

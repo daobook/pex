@@ -62,7 +62,7 @@ def convert_extras(extras):
     # type: (Optional[str]) -> Set[str]
     if not extras:
         return set()
-    return Requirement("placeholder" + extras.lower()).extras
+    return Requirement(f'placeholder{extras.lower()}').extras
 
 
 def parse_editable(editable_req):
@@ -105,8 +105,9 @@ def parse_editable(editable_req):
             return (
                 package_name,
                 url_no_extras,
-                Requirement("placeholder" + extras.lower()).extras,
+                Requirement(f'placeholder{extras.lower()}').extras,
             )
+
         else:
             return package_name, url_no_extras, set()
 
@@ -125,7 +126,7 @@ def parse_editable(editable_req):
     vc_type = url.split('+', 1)[0].lower()
 
     if not vcs.get_backend(vc_type):
-        backends = ", ".join([bends.name + '+URL' for bends in vcs.backends])
+        backends = ", ".join([f'{bends.name}+URL' for bends in vcs.backends])
         error_message = "For --editable={}, " \
                         "only {} are currently supported".format(
                             editable_req, backends)
@@ -340,9 +341,7 @@ def parse_req_from_line(name, line_source):
 
     def with_source(text):
         # type: (str) -> str
-        if not line_source:
-            return text
-        return '{} (from {})'.format(text, line_source)
+        return text if not line_source else '{} (from {})'.format(text, line_source)
 
     if req_as_string is not None:
         try:
@@ -451,19 +450,14 @@ def install_req_from_parsed_requirement(
     use_pep517=None,  # type: Optional[bool]
     user_supplied=False,  # type: bool
 ):
-    # type: (...) -> InstallRequirement
-    if parsed_req.is_editable:
-        req = install_req_from_editable(
+    return install_req_from_editable(
             parsed_req.requirement,
             comes_from=parsed_req.comes_from,
             use_pep517=use_pep517,
             constraint=parsed_req.constraint,
             isolated=isolated,
             user_supplied=user_supplied,
-        )
-
-    else:
-        req = install_req_from_line(
+        ) if parsed_req.is_editable else install_req_from_line(
             parsed_req.requirement,
             comes_from=parsed_req.comes_from,
             use_pep517=use_pep517,
@@ -473,4 +467,3 @@ def install_req_from_parsed_requirement(
             line_source=parsed_req.line_source,
             user_supplied=user_supplied,
         )
-    return req

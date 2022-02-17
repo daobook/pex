@@ -321,10 +321,9 @@ class Lock(OutputMixin, JsonMixin, BuildTimeCommand):
             for target, locked_resolve in lock_file.select(distribution_targets.unique_targets())
         ]
         if self.options.strict:
-            missing_updates = set(lock_file.locked_resolves) - {
+            if missing_updates := set(lock_file.locked_resolves) - {
                 update_request.locked_resolve for update_request in update_requests
-            }
-            if missing_updates:
+            }:
                 return Error(
                     "This lock update is --strict but the following platforms present in "
                     "{lock_file} were not found on the local machine:\n"

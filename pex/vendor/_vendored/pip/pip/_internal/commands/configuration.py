@@ -251,10 +251,7 @@ class ConfigurationCommand(Command):
             ).format(n, get_prog(), example)
             raise PipError(msg)
 
-        if n == 1:
-            return args[0]
-        else:
-            return args
+        return args[0] if n == 1 else args
 
     def _save_configuration(self):
         # type: () -> None

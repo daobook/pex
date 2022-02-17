@@ -117,7 +117,7 @@ def ensure_dir(path):
         os.makedirs(path)
     except OSError as e:
         # Windows can raise spurious ENOTEMPTY errors. See #6426.
-        if e.errno != errno.EEXIST and e.errno != errno.ENOTEMPTY:
+        if e.errno not in [errno.EEXIST, errno.ENOTEMPTY]:
             raise
 
 
@@ -181,18 +181,7 @@ def path_to_display(path):
     except UnicodeDecodeError:
         # Include the full bytes to make troubleshooting easier, even though
         # it may not be very human readable.
-        if PY2:
-            # Convert the bytes to a readable str representation using
-            # repr(), and then convert the str to unicode.
-            #   Also, we add the prefix "b" to the repr() return value both
-            # to make the Python 2 output look like the Python 3 output, and
-            # to signal to the user that this is a bytes representation.
-            display_path = str_to_display('b{!r}'.format(path))
-        else:
-            # Silence the "F821 undefined name 'ascii'" flake8 error since
-            # in Python 3 ascii() is a built-in.
-            display_path = ascii(path)  # noqa: F821
-
+        display_path = str_to_display('b{!r}'.format(path)) if PY2 else ascii(path)
     return display_path
 
 
@@ -205,7 +194,7 @@ def display_path(path):
         path = path.decode(sys.getfilesystemencoding(), 'replace')
         path = path.encode(sys.getdefaultencoding(), 'replace')
     if path.startswith(os.getcwd() + os.path.sep):
-        path = '.' + path[len(os.getcwd()):]
+        path = f'.{path[len(os.getcwd()):]}'
     return path
 
 
@@ -327,10 +316,7 @@ def normalize_path(path, resolve_symlinks=True):
 
     """
     path = expanduser(path)
-    if resolve_symlinks:
-        path = os.path.realpath(path)
-    else:
-        path = os.path.abspath(path)
+    path = os.path.realpath(path) if resolve_symlinks else os.path.abspath(path)
     return os.path.normcase(path)
 
 
@@ -412,7 +398,7 @@ def dist_is_editable(dist):
     Return True if given Distribution is an editable install.
     """
     for path_item in sys.path:
-        egg_link = os.path.join(path_item, dist.project_name + '.egg-link')
+        egg_link = os.path.join(path_item, f'{dist.project_name}.egg-link')
         if os.path.isfile(egg_link):
             return True
     return False
@@ -567,7 +553,7 @@ def egg_link_path(dist):
         sites.append(site_packages)
 
     for site in sites:
-        egglink = os.path.join(site, dist.project_name) + '.egg-link'
+        egglink = f'{os.path.join(site, dist.project_name)}.egg-link'
         if os.path.isfile(egglink):
             return egglink
     return None
@@ -583,8 +569,7 @@ def dist_location(dist):
 
     The returned location is normalized (in particular, with symlinks removed).
     """
-    egg_link = egg_link_path(dist)
-    if egg_link:
+    if egg_link := egg_link_path(dist):
         return normalize_path(egg_link)
     return normalize_path(dist.location)
 
@@ -735,14 +720,7 @@ def split_auth_from_netloc(netloc):
     # behaves if more than one @ is present (which can be checked using
     # the password attribute of urlsplit()'s return value).
     auth, netloc = netloc.rsplit('@', 1)
-    if ':' in auth:
-        # Split from the left because that's how urllib.parse.urlsplit()
-        # behaves if more than one : is present (which again can be checked
-        # using the password attribute of the return value)
-        user_pass = auth.split(':', 1)
-    else:
-        user_pass = auth, None
-
+    user_pass = auth.split(':', 1) if ':' in auth else (auth, None)
     user_pass = tuple(
         None if x is None else urllib_unquote(x) for x in user_pass
     )
@@ -847,12 +825,7 @@ class HiddenText(object):
     # This is useful for testing.
     def __eq__(self, other):
         # type: (Any) -> bool
-        if type(self) != type(other):
-            return False
-
-        # The string being used for redaction doesn't also have to match,
-        # just the raw, original string.
-        return (self.secret == other.secret)
+        return False if type(self) != type(other) else (self.secret == other.secret)
 
     # We need to provide an explicit __ne__ implementation for Python 2.
     # TODO: remove this when we drop PY2 support.
@@ -885,14 +858,11 @@ def protect_pip_from_modification_on_windows(modifying_pip):
         "pip{}.{}.exe".format(*sys.version_info[:2])
     ]
 
-    # See https://github.com/pypa/pip/issues/1299 for more discussion
-    should_show_use_python_msg = (
-        modifying_pip and
-        WINDOWS and
-        os.path.basename(sys.argv[0]) in pip_names
-    )
-
-    if should_show_use_python_msg:
+    if should_show_use_python_msg := (
+        modifying_pip
+        and WINDOWS
+        and os.path.basename(sys.argv[0]) in pip_names
+    ):
         new_command = [
             sys.executable, "-m", "pip"
         ] + sys.argv[1:]

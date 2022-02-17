@@ -58,7 +58,7 @@ copyright = u"%s, Pants project contributors" % datetime.now().year
 # built documents.
 #
 # The short X.Y version.
-version = ".".join(PEX_VERSION.split(".")[0:2])
+version = ".".join(PEX_VERSION.split(".")[:2])
 
 # The full version, including alpha/beta/rc tags.
 release = PEX_VERSION

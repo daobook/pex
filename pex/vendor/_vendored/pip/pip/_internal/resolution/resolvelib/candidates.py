@@ -42,10 +42,7 @@ logger = logging.getLogger(__name__)
 def make_install_req_from_link(link, template):
     # type: (Link, InstallRequirement) -> InstallRequirement
     assert not template.editable, "template is editable"
-    if template.req:
-        line = str(template.req)
-    else:
-        line = link.url
+    line = str(template.req) if template.req else link.url
     ireq = install_req_from_line(
         line,
         user_supplied=template.user_supplied,
@@ -541,10 +538,11 @@ class ExtrasCandidate(Candidate):
             )
 
         for r in self.base.dist.requires(valid_extras):
-            requirement = factory.make_requirement_from_spec(
-                str(r), self.base._ireq, valid_extras,
-            )
-            if requirement:
+            if requirement := factory.make_requirement_from_spec(
+                str(r),
+                self.base._ireq,
+                valid_extras,
+            ):
                 yield requirement
 
     def get_install_requirement(self):

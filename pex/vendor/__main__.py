@@ -106,12 +106,11 @@ class ImportRewriter(object):
                 parent = call_node.parent_find("AtomtrailersNode")
                 original = parent.copy()
                 first_argument = call_node[0]
-                raw_value = self._find_literal_node(parent, first_argument)
-                if raw_value:
+                if raw_value := self._find_literal_node(parent, first_argument):
                     value = raw_value.to_python()
                     root_package = value.split(".")[0]
                     if root_package in self._packages:
-                        raw_value.replace("{!r}".format(self._prefix + "." + value))
+                        raw_value.replace("{!r}".format(f'{self._prefix}.{value}'))
 
                         parent.replace(self._modify_import(original, parent))
                         yield original, parent
@@ -274,8 +273,7 @@ def vendorize(root_dir, vendor_specs, prefix):
                 if f.endswith(".py"):
                     python_file = os.path.join(root, f)
                     print(green("Examining {python_file}...".format(python_file=python_file)))
-                    modifications = import_rewriter.rewrite(python_file)
-                    if modifications:
+                    if modifications := import_rewriter.rewrite(python_file):
                         num_mods = len(modifications)
                         print(
                             bold(

@@ -52,8 +52,7 @@ class DistributionScript(object):
 
 def get_script_from_distributions(name, dists):
     for dist in dists:
-        distribution_script = DistributionScript.find(dist, name)
-        if distribution_script:
+        if distribution_script := DistributionScript.find(dist, name):
             return distribution_script
 
 

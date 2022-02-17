@@ -95,8 +95,9 @@ def iter_compatible_interpreters(
                 candidate_paths = frozenset(
                     (current_interpreter.binary, os.path.dirname(current_interpreter.binary))
                 )
-                candidate_paths_in_path = candidate_paths.intersection(normalized_paths)
-                if candidate_paths_in_path:
+                if candidate_paths_in_path := candidate_paths.intersection(
+                    normalized_paths
+                ):
                     # In case the full path of the current interpreter binary was in the
                     # `normalized_paths` we're searching, remove it to prevent identifying it again
                     # just to then skip it as `seen`.
@@ -509,15 +510,15 @@ def bootstrap_pex(entry_point):
     # ENV.PEX_ROOT is consulted by PythonInterpreter and Platform so set that up as early as
     # possible in the run.
     with ENV.patch(PEX_ROOT=pex_info.pex_root):
-        if not (ENV.PEX_UNZIP or ENV.PEX_TOOLS) and pex_info.venv:
+        from . import pex
+
+        if not ENV.PEX_UNZIP and not ENV.PEX_TOOLS and pex_info.venv:
             try:
                 target = find_compatible_interpreter(
                     interpreter_constraints=pex_info.interpreter_constraints,
                 )
             except UnsatisfiableInterpreterConstraintsError as e:
                 die(str(e))
-            from . import pex
-
             try:
                 venv_pex = ensure_venv(pex.PEX(entry_point, interpreter=target))
             except ValueError as e:
@@ -525,8 +526,6 @@ def bootstrap_pex(entry_point):
             os.execv(venv_pex, [venv_pex] + sys.argv[1:])
         else:
             maybe_reexec_pex(pex_info.interpreter_constraints)
-            from . import pex
-
             pex.PEX(entry_point).execute()
 
 

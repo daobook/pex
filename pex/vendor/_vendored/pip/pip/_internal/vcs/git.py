@@ -121,7 +121,7 @@ class Git(VersionControl):
         # type: (str, HiddenText) -> None
         """Export the Git repository at the url to the destination location"""
         if not location.endswith('/'):
-            location = location + '/'
+            location = f'{location}/'
 
         with TempDirectory(kind="export") as temp_dir:
             self.unpack(temp_dir.path, url=url)
@@ -247,11 +247,7 @@ class Git(VersionControl):
           dest: the repository directory.
           name: a string name.
         """
-        if not name:
-            # Then avoid an unnecessary subprocess call.
-            return False
-
-        return cls.get_revision(dest) == name
+        return False if not name else cls.get_revision(dest) == name
 
     def fetch_new(self, dest, url, rev_options):
         # type: (str, HiddenText, RevOptions) -> None
@@ -346,10 +342,11 @@ class Git(VersionControl):
         """
         try:
             cls.run_command(
-                ['rev-parse', '-q', '--verify', "sha^" + rev],
+                ['rev-parse', '-q', '--verify', f'sha^{rev}'],
                 cwd=location,
                 log_failed_cmd=False,
             )
+
         except InstallationError:
             return False
         else:
@@ -430,8 +427,7 @@ class Git(VersionControl):
 
     @classmethod
     def get_repository_root(cls, location):
-        loc = super(Git, cls).get_repository_root(location)
-        if loc:
+        if loc := super(Git, cls).get_repository_root(location):
             return loc
         try:
             r = cls.run_command(

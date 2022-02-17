@@ -143,9 +143,7 @@ class DefaultedProperty(Generic["_O", "_P"]):
 
     def _validate(self, instance, value):
         # type: (_O, _P) -> _P
-        if self._validator is None:
-            return value
-        return self._validator(instance, value)
+        return value if self._validator is None else self._validator(instance, value)
 
 
 def defaulted_property(

@@ -258,7 +258,7 @@ class Configuration(object):
         """Loads configuration from configuration files
         """
         config_files = dict(self.iter_config_files())
-        if config_files[kinds.ENV][0:1] == [os.devnull]:
+        if config_files[kinds.ENV][:1] == [os.devnull]:
             logger.debug(
                 "Skipping loading configuration files due to "
                 "environment's PIP_CONFIG_FILE being os.devnull"
@@ -331,7 +331,7 @@ class Configuration(object):
         """
         normalized = {}
         for name, val in items:
-            key = section + "." + _normalize_name(name)
+            key = f'{section}.{_normalize_name(name)}'
             normalized[key] = val
         return normalized
 
@@ -365,11 +365,9 @@ class Configuration(object):
         # at the base we have any global configuration
         yield kinds.GLOBAL, config_files[kinds.GLOBAL]
 
-        # per-user configuration next
-        should_load_user_config = not self.isolated and not (
+        if should_load_user_config := not self.isolated and not (
             config_file and os.path.exists(config_file)
-        )
-        if should_load_user_config:
+        ):
             # The legacy config file is overridden by the new config file
             yield kinds.USER, config_files[kinds.USER]
 

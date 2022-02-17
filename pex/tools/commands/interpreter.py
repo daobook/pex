@@ -61,11 +61,10 @@ class Interpreter(JsonMixin, OutputMixin, PEXCommand):
                 "Ignoring PEX_PYTHON={} in order to scan for all compatible "
                 "interpreters.".format(ENV.PEX_PYTHON)
             )
-        for interpreter in pex_bootstrapper.iter_compatible_interpreters(
+        yield from pex_bootstrapper.iter_compatible_interpreters(
             path=ENV.PEX_PYTHON_PATH,
             interpreter_constraints=pex.pex_info().interpreter_constraints,
-        ):
-            yield interpreter
+        )
 
     def run(self, pex):
         # type: (PEX) -> Result

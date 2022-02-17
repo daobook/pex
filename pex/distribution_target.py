@@ -161,11 +161,10 @@ class DistributionTarget(object):
     def id(self):
         # type: () -> str
         """A unique id for this distribution target suitable as a path name component."""
-        if self.is_interpreter:
-            interpreter = self.get_interpreter()
-            return interpreter.binary.replace(os.sep, ".").lstrip(".")
-        else:
+        if not self.is_interpreter:
             return str(self._platform)
+        interpreter = self.get_interpreter()
+        return interpreter.binary.replace(os.sep, ".").lstrip(".")
 
     def __repr__(self):
         # type: () -> str

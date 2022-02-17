@@ -109,8 +109,7 @@ class LockedRequirement(object):
     def iter_artifacts(self):
         # type: () -> Iterator[Artifact]
         yield self.artifact
-        for artifact in self.additional_artifacts:
-            yield artifact
+        yield from self.additional_artifacts
 
 
 @attr.s(frozen=True)

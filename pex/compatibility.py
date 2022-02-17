@@ -28,12 +28,11 @@ except ImportError:
 
 
 AbstractClass = ABCMeta("AbstractClass", (object,), {})
-PY2 = sys_version_info[0] == 2
 PY3 = sys_version_info[0] == 3
 
 string = cast("Tuple[Type, ...]", (str,) if PY3 else (str, unicode))  # type: ignore[name-defined]
 
-if PY2:
+if PY2 := sys_version_info[0] == 2:
     from collections import Iterable as Iterable
     from collections import MutableSet as MutableSet
 else:
@@ -93,7 +92,7 @@ if PY3:
 
     def exec_function(ast, globals_map):
         locals_map = globals_map
-        exec (ast, globals_map, locals_map)
+        exec(ast, locals_map, locals_map)
         return locals_map
 
 

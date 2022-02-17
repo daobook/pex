@@ -91,9 +91,9 @@ def pluralize(
     if count == 1:
         return noun
     if noun[-1] in ("s", "x", "z") or noun[-2:] in ("sh", "ch"):
-        return noun + "es"
+        return f'{noun}es'
     else:
-        return noun + "s"
+        return f'{noun}s'
 
 
 def qualified_name(item):
@@ -302,8 +302,7 @@ def safe_open(filename, *args, **kwargs):
     ``safe_open`` ensures that the directory components leading up the specified file have been
     created first.
     """
-    parent_dir = os.path.dirname(filename)
-    if parent_dir:
+    if parent_dir := os.path.dirname(filename):
         safe_mkdir(parent_dir)
     return open(filename, *args, **kwargs)  # noqa: T802
 
@@ -338,7 +337,7 @@ def safe_sleep(seconds):
     Until Python 3.5, there was no guarantee that time.sleep() would actually sleep the requested
     time. See https://docs.python.org/3/library/time.html#time.sleep.
     """
-    if sys.version_info[0:2] >= (3, 5):
+    if sys.version_info[:2] >= (3, 5):
         time.sleep(seconds)
     else:
         start_time = current_time = time.time()
@@ -528,7 +527,7 @@ def is_script(
     if check_executable and not is_exe(path):
         return False
     with open(path, "rb") as fp:
-        if b"#!" != fp.read(2):
+        if fp.read(2) != b"#!":
             return False
         if not pattern:
             return True

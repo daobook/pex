@@ -98,7 +98,7 @@ class PackageIndexConfiguration(object):
 
         def maybe_trust_insecure_host(url):
             url_info = urlparse.urlparse(url)
-            if "http" == url_info.scheme:
+            if url_info.scheme == "http":
                 # Implicitly trust explicitly asked for http indexes and find_links repos instead of
                 # requiring separate trust configuration.
                 trusted_hosts.append(url_info.netloc)
@@ -278,15 +278,14 @@ class _Issue9420Analyzer(_ErrorAnalyzer):
         # 2021-01-04T16:12:01,119 2. remove package versions to allow pip attempt to solve the dependency conflict
         # 2021-01-04T16:12:01,119 ERROR: ResolutionImpossible: for help visit https://pip.pypa.io/en/latest/user_guide/#fixing-conflicting-dependencies
         if not self._strip:
-            match = re.match(r"^(?P<timestamp>[^ ]+) ERROR: Cannot install ", line)
-            if match:
+            if match := re.match(
+                r"^(?P<timestamp>[^ ]+) ERROR: Cannot install ", line
+            ):
                 self._strip = len(match.group("timestamp"))
+        elif match := re.match(r"^[^ ]+ ERROR: ResolutionImpossible: ", line):
+            return self.Complete()
         else:
-            match = re.match(r"^[^ ]+ ERROR: ResolutionImpossible: ", line)
-            if match:
-                return self.Complete()
-            else:
-                return self.Continue(ErrorMessage(line[self._strip :]))
+            return self.Continue(ErrorMessage(line[self._strip :]))
         return self.Continue()
 
 
@@ -297,15 +296,11 @@ class _Issue10050Analyzer(_ErrorAnalyzer):
     _platform = attr.ib()  # type: Platform
 
     def analyze(self, line):
-        # type: (str) -> ErrorAnalysis
-        # N.B.: Pip --log output looks like:
-        # 2021-06-20T19:06:00,981 pip._vendor.packaging.markers.UndefinedEnvironmentName: 'python_full_version' does not exist in evaluation environment.
-        match = re.match(
+        if match := re.match(
             r"^[^ ]+ pip._vendor.packaging.markers.UndefinedEnvironmentName: "
             r"(?P<missing_marker>.*)\.$",
             line,
-        )
-        if match:
+        ):
             return self.Complete(
                 ErrorMessage(
                     "Failed to resolve for platform {}. Resolve requires evaluation of unknown "
@@ -434,8 +429,9 @@ class Locker(_LogAnalyzer):
         # type: (str) -> Tuple[Pin, PartialArtifact]
 
         fingerprint = None  # type: Optional[Fingerprint]
-        fingerprint_match = re.search(r"(?P<url>[^#]+)#(?P<algorithm>[^=]+)=(?P<hash>.*)$", url)
-        if fingerprint_match:
+        if fingerprint_match := re.search(
+            r"(?P<url>[^#]+)#(?P<algorithm>[^=]+)=(?P<hash>.*)$", url
+        ):
             url = fingerprint_match.group("url")
             algorithm = fingerprint_match.group("algorithm")
             hash_ = fingerprint_match.group("hash")
@@ -473,12 +469,11 @@ class Locker(_LogAnalyzer):
                 self._done_building_re = None
             return self.Continue()
 
-        match = re.search(
+        if match := re.search(
             r"Added (?P<requirement>.*) from (?P<url>[^\s]+) (?:\(from (?P<from>.*)\) )?to build "
             r"tracker",
             line,
-        )
-        if match:
+        ):
             raw_requirement = match.group("requirement")
             url = match.group("url")
             self._done_building_re = re.compile(
@@ -490,12 +485,7 @@ class Locker(_LogAnalyzer):
             requirement = Requirement.parse(raw_requirement)
             project_name_and_version, partial_artifact = self._extract_resolve_data(url)
 
-            from_ = match.group("from")
-            if from_:
-                via = tuple(from_.split("->"))
-            else:
-                via = ()
-
+            via = tuple(from_.split("->")) if (from_ := match.group("from")) else ()
             additional_artifacts = self._links[project_name_and_version]
             additional_artifacts.discard(partial_artifact)
             self._links.clear()
@@ -510,8 +500,9 @@ class Locker(_LogAnalyzer):
                 )
             )
         elif LockStyle.SOURCES == self._lock_configuration.style:
-            match = re.search(r"Found link (?P<url>[^\s]+)(?: \(from .*\))?, version: ", line)
-            if match:
+            if match := re.search(
+                r"Found link (?P<url>[^\s]+)(?: \(from .*\))?, version: ", line
+            ):
                 project_name_and_version, partial_artifact = self._extract_resolve_data(
                     match.group("url")
                 )
@@ -557,12 +548,11 @@ class _LogScrapeJob(Job):
         super(_LogScrapeJob, self).__init__(command, process)
 
     def _check_returncode(self, stderr=None):
-        activated_analyzers = [
+        if activated_analyzers := [
             analyzer
             for analyzer in self._log_analyzers
             if analyzer.should_collect(self._process.returncode)
-        ]
-        if activated_analyzers:
+        ]:
             collected = []
             with open(self._log, "r") as fp:
                 for line in fp:
@@ -740,15 +730,12 @@ class Pip(object):
             extra_env.update(package_index_configuration.env)
 
         with ENV.strip().patch(
-            PEX_ROOT=cache or ENV.PEX_ROOT,
-            PEX_VERBOSE=str(ENV.PEX_VERBOSE),
-            __PEX_UNVENDORED__="1",
-            **extra_env
-        ) as env:
-            # Guard against API calls from environment with ambient PYTHONPATH preventing pip PEX
-            # bootstrapping. See: https://github.com/pantsbuild/pex/issues/892
-            pythonpath = env.pop("PYTHONPATH", None)
-            if pythonpath:
+                PEX_ROOT=cache or ENV.PEX_ROOT,
+                PEX_VERBOSE=str(ENV.PEX_VERBOSE),
+                __PEX_UNVENDORED__="1",
+                **extra_env
+            ) as env:
+            if pythonpath := env.pop("PYTHONPATH", None):
                 TRACER.log(
                     "Scrubbed PYTHONPATH={} from the pip PEX environment.".format(pythonpath), V=3
                 )
@@ -1082,14 +1069,14 @@ class Pip(object):
         direct_url_relpath,  # type: Optional[str]
         modified_scripts=None,  # type: Optional[Iterable[str]]
     ):
-        # type: (...) -> None
-
-        exclude_relpaths = []
-
         record_abspath = os.path.join(install_dir, record_relpath)
 
         if direct_url_relpath:
             direct_url_abspath = os.path.join(install_dir, direct_url_relpath)
+            # type: (...) -> None
+
+            exclude_relpaths = []
+
             with open(direct_url_abspath) as fp:
                 if urlparse.urlparse(json.load(fp)["url"]).scheme == "file":
                     exclude_relpaths.append(os.path.relpath(direct_url_abspath, install_dir))

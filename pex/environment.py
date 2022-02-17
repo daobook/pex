@@ -402,13 +402,12 @@ class PEXEnvironment(object):
             if required is False:
                 continue
 
-            for not_found in self._resolve_requirement(
+            yield from self._resolve_requirement(
                 dep_requirement,
                 resolved_dists_by_key,
                 required,
                 required_by=resolved_distribution,
-            ):
-                yield not_found
+            )
 
     def _root_requirements_iter(self, reqs):
         # type: (Iterable[Requirement]) -> Iterator[QualifiedRequirementOrNotFound]
@@ -449,8 +448,9 @@ class PEXEnvironment(object):
                     "A distribution for {project_name} could not be resolved in this "
                     "environment.".format(project_name=project_name)
                 )
-                unavailable_dists = self._unavailable_dists_by_project_name.get(project_name)
-                if unavailable_dists:
+                if unavailable_dists := self._unavailable_dists_by_project_name.get(
+                    project_name
+                ):
                     message += (
                         "Found {count} {distributions} for {project_name} that do not apply:\n"
                         "{unavailable_dists}".format(
@@ -612,10 +612,7 @@ class PEXEnvironment(object):
         # type: (Iterable[Distribution]) -> None
         namespace_packages_by_dist = OrderedDict()
         for dist in resolved_dists:
-            namespace_packages = cls._get_namespace_packages(dist)
-            # NB: Dists can explicitly declare empty namespace packages lists to indicate they have none.
-            # We only care about dists with one or more namespace packages though; thus, the guard.
-            if namespace_packages:
+            if namespace_packages := cls._get_namespace_packages(dist):
                 namespace_packages_by_dist[dist] = namespace_packages
 
         if not namespace_packages_by_dist:
@@ -666,7 +663,7 @@ class PEXEnvironment(object):
     def _activate(self):
         # type: () -> Iterable[Distribution]
 
-        if not any(self._pex == os.path.realpath(path) for path in sys.path):
+        if all(self._pex != os.path.realpath(path) for path in sys.path):
             TRACER.log("Adding pex environment to the head of sys.path: {}".format(self._pex))
             sys.path.insert(0, self._pex)
 

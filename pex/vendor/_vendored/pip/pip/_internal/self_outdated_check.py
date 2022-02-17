@@ -34,8 +34,7 @@ logger = logging.getLogger(__name__)
 def _get_statefile_name(key):
     # type: (Union[str, Text]) -> str
     key_bytes = ensure_binary(key)
-    name = hashlib.sha224(key_bytes).hexdigest()
-    return name
+    return hashlib.sha224(key_bytes).hexdigest()
 
 
 class SelfCheckState(object):
@@ -108,7 +107,7 @@ def was_installed_by_pip(pkg):
     dist = get_distribution(pkg)
     if not dist:
         return False
-    return "pip" == get_installer(dist)
+    return get_installer(dist) == "pip"
 
 
 def pip_self_version_check(session, options):

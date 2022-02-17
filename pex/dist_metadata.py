@@ -133,10 +133,7 @@ def find_dist_info_file(
         os.path.join("{}-{}.dist-info".format(project_name_pattern, re.escape(version)), filename)
     )
     wheel_metadata_re = re.compile(wheel_metadata_pattern, re.IGNORECASE)
-    for item in listing:
-        if wheel_metadata_re.match(item):
-            return item
-    return None
+    return next((item for item in listing if wheel_metadata_re.match(item)), None)
 
 
 def _parse_wheel_package_info(wheel_path):
@@ -306,8 +303,7 @@ def requires_dists(dist):
     for requires_dist in pkg_info.get_all("Requires-Dist", ()):
         yield Requirement.parse(requires_dist)
 
-    legacy_requires = pkg_info.get_all("Requires", [])  # type: List[str]
-    if legacy_requires:
+    if legacy_requires := pkg_info.get_all("Requires", []):
         name_and_version = project_name_and_version(dist)
         project_name = name_and_version.project_name if name_and_version else dist
         pex_warnings.warn(

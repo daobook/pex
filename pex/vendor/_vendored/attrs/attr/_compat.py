@@ -93,7 +93,7 @@ if PY2:
 
         def __repr__(self):
             # Override to be identical to the Python 3 version.
-            return "mappingproxy(" + repr(self.data) + ")"
+            return f'mappingproxy({repr(self.data)})'
 
     def metadata_proxy(d):
         res = ReadOnlyDict()

@@ -803,16 +803,9 @@ class BuildAndInstallRequest(object):
                 if not target.requirement_applies(requirement):
                     continue
 
-                installed_requirement_dist = installed_distribution_by_project_name.get(
+                if installed_requirement_dist := installed_distribution_by_project_name.get(
                     ProjectName(requirement)
-                )
-                if not installed_requirement_dist:
-                    unsatisfied.append(
-                        "{dist} requires {requirement} but no version was resolved".format(
-                            dist=dist.as_requirement(), requirement=requirement
-                        )
-                    )
-                else:
+                ):
                     installed_dist = installed_requirement_dist.distribution
                     if installed_dist not in requirement:
                         unsatisfied.append(
@@ -823,6 +816,12 @@ class BuildAndInstallRequest(object):
                             )
                         )
 
+                else:
+                    unsatisfied.append(
+                        "{dist} requires {requirement} but no version was resolved".format(
+                            dist=dist.as_requirement(), requirement=requirement
+                        )
+                    )
         if unsatisfied:
             raise Unsatisfiable(
                 "Failed to resolve compatible distributions:\n{failures}".format(

@@ -57,16 +57,19 @@ def _prepare_download(
     else:
         logger.info("Downloading %s", logged_url)
 
-    if logger.getEffectiveLevel() > logging.INFO:
-        show_progress = False
-    elif is_from_cache(resp):
-        show_progress = False
-    elif not total_length:
-        show_progress = True
-    elif total_length > (40 * 1000):
-        show_progress = True
-    else:
-        show_progress = False
+    show_progress = bool(
+        logger.getEffectiveLevel() <= logging.INFO
+        and (
+            logger.getEffectiveLevel() > logging.INFO
+            or not is_from_cache(resp)
+        )
+        and (
+            logger.getEffectiveLevel() > logging.INFO
+            or is_from_cache(resp)
+            or not total_length
+            or total_length > (40 * 1000)
+        )
+    )
 
     chunks = response_chunks(resp, CONTENT_CHUNK_SIZE)
 
@@ -107,9 +110,7 @@ def _get_http_response_filename(resp, link):
     the link filename if not provided.
     """
     filename = link.filename  # fallback
-    # Have a look at the Content-Disposition header for a better guess
-    content_disposition = resp.headers.get('content-disposition')
-    if content_disposition:
+    if content_disposition := resp.headers.get('content-disposition'):
         filename = parse_content_disposition(content_disposition, filename)
     ext = splitext(filename)[1]  # type: Optional[str]
     if not ext:
@@ -119,8 +120,7 @@ def _get_http_response_filename(resp, link):
         if ext:
             filename += ext
     if not ext and link.url != resp.url:
-        ext = os.path.splitext(resp.url)[1]
-        if ext:
+        if ext := os.path.splitext(resp.url)[1]:
             filename += ext
     return filename
 

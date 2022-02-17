@@ -130,8 +130,7 @@ class Virtualenv(object):
         # Guard against API calls from environment with ambient PYTHONPATH preventing pip virtualenv
         # creation. See: https://github.com/pantsbuild/pex/issues/1451
         env = os.environ.copy()
-        pythonpath = env.pop("PYTHONPATH", None)
-        if pythonpath:
+        if pythonpath := env.pop("PYTHONPATH", None):
             TRACER.log(
                 "Scrubbed PYTHONPATH={} from the virtualenv creation environment.".format(
                     pythonpath
@@ -141,7 +140,7 @@ class Virtualenv(object):
 
         custom_prompt = None  # type: Optional[str]
         py_major_minor = interpreter.version[:2]
-        if py_major_minor[0] >= 3 and not interpreter.identity.interpreter == "PyPy":
+        if py_major_minor[0] >= 3 and interpreter.identity.interpreter != "PyPy":
             # N.B.: PyPy3 comes equipped with a venv module but it does not seem to work.
             args = ["-m", "venv", "--without-pip", venv_dir]
             if copies:
@@ -304,13 +303,12 @@ class Virtualenv(object):
             yield DistributionInfo(**dist_info)
 
     def _rewrite_base_scripts(self, real_venv_dir):
-        # type: (str) -> Iterator[str]
-        scripts = [
+        if scripts := [
             path
             for path in self._base_bin
-            if _is_python_script(path) or re.search(r"^[Aa]ctivate", os.path.basename(path))
-        ]
-        if scripts:
+            if _is_python_script(path)
+            or re.search(r"^[Aa]ctivate", os.path.basename(path))
+        ]:
             rewritten_files = set()
             with closing(fileinput.input(files=sorted(scripts), inplace=True)) as fi:
                 for line in fi:
@@ -327,11 +325,11 @@ class Virtualenv(object):
         python=None,  # type: Optional[str]
         python_args=None,  # type: Optional[str]
     ):
-        # type: (...) -> Iterator[str]
-        python_scripts = [
-            executable for executable in self.iter_executables() if _is_python_script(executable)
-        ]
-        if python_scripts:
+        if python_scripts := [
+            executable
+            for executable in self.iter_executables()
+            if _is_python_script(executable)
+        ]:
             with closing(
                 fileinput.input(files=sorted(python_scripts), inplace=True, mode="rb")
             ) as fi:

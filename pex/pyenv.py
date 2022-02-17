@@ -104,8 +104,9 @@ class Pyenv(object):
             If the shim is not activated, returns `None`.
             """
             with TRACER.timed("Calculating active version for {}...".format(self), V=6):
-                active_versions = self.pyenv.active_versions(search_dir=search_dir)
-                if active_versions:
+                if active_versions := self.pyenv.active_versions(
+                    search_dir=search_dir
+                ):
                     binary_name = os.path.basename(self.path)
                     if self.name == "python" and not self.major and not self.minor:
                         for pyenv_version in active_versions:
@@ -138,8 +139,7 @@ class Pyenv(object):
         # type: (str) -> Iterator[str]
         with open(version_file) as fp:
             for line in fp:
-                for version in line.strip().split():
-                    yield version
+                yield from line.strip().split()
 
     @staticmethod
     def _find_local_version_file(search_dir):
@@ -161,8 +161,7 @@ class Pyenv(object):
 
         # See: https://github.com/pyenv/pyenv#choosing-the-python-version
         with TRACER.timed("Finding {} active versions...".format(self), V=6):
-            shell_version = os.environ.get("PYENV_VERSION")
-            if shell_version:
+            if shell_version := os.environ.get("PYENV_VERSION"):
                 source_and_versions = (
                     "PYENV_VERSION={}".format(shell_version),
                     shell_version.split(":"),
@@ -171,8 +170,7 @@ class Pyenv(object):
                 cwd = search_dir if search_dir is not None else os.getcwd()
                 TRACER.log("Looking for pyenv version files starting from {}.".format(cwd), V=6)
 
-                local_version = self._find_local_version_file(search_dir=cwd)
-                if local_version:
+                if local_version := self._find_local_version_file(search_dir=cwd):
                     source_and_versions = (local_version, self._read_pyenv_versions(local_version))
                 else:
                     global_version = os.path.join(self.root, "version")

@@ -80,9 +80,7 @@ class PythonIdentity(object):
 
         # N.B.: Sometimes MACOSX_DEPLOYMENT_TARGET can be configured as a float.
         # See: https://github.com/pantsbuild/pex/issues/1337
-        if value is None:
-            return None
-        return str(value)
+        return None if value is None else str(value)
 
     @classmethod
     def get(cls, binary=None):
@@ -330,7 +328,7 @@ class PythonIdentity(object):
         # type: () -> str
         # return the python version in the format of the 'python' key for distributions
         # specifically, '2.7', '3.2', etc.
-        return "%d.%d" % (self.version[0:2])
+        return "%d.%d" % self.version[:2]
 
     def __str__(self):
         # type: () -> str
@@ -601,13 +599,7 @@ class PythonInterpreter(object):
         env=None,  # type: Optional[Mapping[str, str]]
     ):
         # type: (...) -> Tuple[Iterable[str], Mapping[str, str]]
-        cmd = [binary]
-
-        # Don't add the user site directory to `sys.path`.
-        #
-        # Additionally, it would be nice to pass `-S` to disable adding site-packages but unfortunately
-        # some python distributions include portions of the standard library there.
-        cmd.append("-s")
+        cmd = [binary, '-s']
 
         env = cls._sanitized_environment(env=env)
         pythonpath = list(pythonpath or ())
@@ -912,8 +904,7 @@ class PythonInterpreter(object):
             for path in cls._paths(paths=paths):
                 for fn in cls._expand_path(path):
                     if filter(fn):
-                        binary = cls._resolve_pyenv_shim(fn)
-                        if binary:
+                        if binary := cls._resolve_pyenv_shim(fn):
                             yield binary
 
         results = execute_parallel(

@@ -271,8 +271,7 @@ def iter_pth_paths(filename):
                     # by the .pth files then will still be available now as cached in sys.modules.
                     sys.path = []
                     exec_function(line, globals_map={})
-                    for path in sys.path:
-                        yield path
+                    yield from sys.path
                 except Exception as e:
                     # NB: import lines are routinely abused with extra code appended using `;` so
                     # the class of exceptions that might be raised in broader than ImportError. As

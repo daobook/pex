@@ -12,9 +12,7 @@ if MYPY_CHECK_RUNNING:
 
 def get_url_scheme(url):
     # type: (Union[str, Text]) -> Optional[Text]
-    if ':' not in url:
-        return None
-    return url.split(':', 1)[0].lower()
+    return None if ':' not in url else url.split(':', 1)[0].lower()
 
 
 def path_to_url(path):
@@ -24,8 +22,7 @@ def path_to_url(path):
     quoted path parts.
     """
     path = os.path.normpath(os.path.abspath(path))
-    url = urllib_parse.urljoin('file:', urllib_request.pathname2url(path))
-    return url
+    return urllib_parse.urljoin('file:', urllib_request.pathname2url(path))
 
 
 def url_to_path(url):
@@ -44,7 +41,7 @@ def url_to_path(url):
         netloc = ''
     elif sys.platform == 'win32':
         # If we have a UNC path, prepend UNC share notation.
-        netloc = '\\\\' + netloc
+        netloc = f'\\\\{netloc}'
     else:
         raise ValueError(
             'non-local file URIs are not supported on this platform: {url!r}'

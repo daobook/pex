@@ -43,7 +43,7 @@ class _Loader(namedtuple("_Loader", ["module_name", "vendor_module_name"])):
                 sys.modules.pop(mod)
                 _tracer().log("un-imported {}".format(mod), V=9)
 
-                submod_prefix = mod + "."
+                submod_prefix = f'{mod}.'
                 for submod in sorted(m for m in sys.modules.keys() if m.startswith(submod_prefix)):
                     sys.modules.pop(submod)
                     _tracer().log("un-imported {}".format(submod), V=9)
@@ -58,11 +58,11 @@ class _Importable(namedtuple("_Importable", ["module", "is_pkg", "path", "prefix
         _tracer().log("Exposed {}".format(self), V=3)
 
     def loader_for(self, fullname):
-        if fullname.startswith(self.prefix + "."):
-            target = fullname[len(self.prefix + ".") :]
+        if fullname.startswith(f'{self.prefix}.'):
+            target = fullname[len(f'{self.prefix}.'):]
+        elif not self._exposed:
+            return None
         else:
-            if not self._exposed:
-                return None
             target = fullname
 
         if target == self.module or self.is_pkg and target.startswith(self.module + "."):
@@ -117,8 +117,9 @@ class _ZipIterator(namedtuple("_ZipIterator", ["zipfile_path", "prefix"])):
                 yield package
 
     def iter_root_packages(self, relpath):
-        for package in self._filter_names(relpath, r"(?P<package>[^/]+)/__init__\.py", "package"):
-            yield package
+        yield from self._filter_names(
+            relpath, r"(?P<package>[^/]+)/__init__\.py", "package"
+        )
 
     def _filter_names(self, relpath, pattern, group):
         # We use '/' here because the zip file format spec specifies that paths must use
@@ -128,8 +129,7 @@ class _ZipIterator(namedtuple("_ZipIterator", ["zipfile_path", "prefix"])):
         pat = re.compile(r"^{}{}{}$".format(self.prefix, relpath_pat, pattern))
         with contextlib.closing(zipfile.ZipFile(self.zipfile_path)) as zf:
             for name in zf.namelist():
-                match = pat.match(name)
-                if match:
+                if match := pat.match(name):
                     yield match.group(group)
 
 
@@ -176,10 +176,14 @@ class VendorImporter(object):
     def _iter_installed_vendor_importers(cls, prefix, root, path_items):
         for importer in cls._iter_all_installed_vendor_importers():
             # All Importables for a given VendorImporter will have the same prefix.
-            if importer._importables and importer._importables[0].prefix == prefix:
-                if importer._root == root:
-                    if {importable.path for importable in importer._importables} == set(path_items):
-                        yield importer
+            if (
+                importer._importables
+                and importer._importables[0].prefix == prefix
+                and importer._root == root
+                and {importable.path for importable in importer._importables}
+                == set(path_items)
+            ):
+                yield importer
 
     @classmethod
     def install_vendored(cls, prefix, root=None, expose=None):
@@ -477,8 +481,7 @@ def expose(dists):
     :raise: :class:`ValueError` if any distributions to expose cannot be found.
     :returns: An iterator of exposed vendored distribution chroot paths.
     """
-    for path in VendorImporter.expose(dists, root=isolated().chroot_path):
-        yield path
+    yield from VendorImporter.expose(dists, root=isolated().chroot_path)
 
 
 # Implicitly install an importer for vendored code on the first import of pex.third_party.

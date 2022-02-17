@@ -74,7 +74,7 @@ class Link(KeyBasedCompareMixin):
         self._url = url
 
         self.comes_from = comes_from
-        self.requires_python = requires_python if requires_python else None
+        self.requires_python = requires_python or None
         self.yanked_reason = yanked_reason
 
         super(Link, self).__init__(key=url, defining_class=Link)
@@ -182,19 +182,11 @@ class Link(KeyBasedCompareMixin):
 
     @property
     def hash(self):
-        # type: () -> Optional[str]
-        match = self._hash_re.search(self._url)
-        if match:
-            return match.group(2)
-        return None
+        return match.group(2) if (match := self._hash_re.search(self._url)) else None
 
     @property
     def hash_name(self):
-        # type: () -> Optional[str]
-        match = self._hash_re.search(self._url)
-        if match:
-            return match.group(1)
-        return None
+        return match.group(1) if (match := self._hash_re.search(self._url)) else None
 
     @property
     def show_url(self):

@@ -102,7 +102,7 @@ class bdist_pex(Command):  # noqa
                 for script_name in console_scripts
             )
         else:
-            target = os.path.join(self.bdist_dir, name + "-" + version + ".pex")
+            target = os.path.join(self.bdist_dir, f'{name}-{version}.pex')
             pex_specs.append((name if name in console_scripts else None, target))
 
         args = ["-m", "pex", package_dir] + options.requirements + self.pex_args

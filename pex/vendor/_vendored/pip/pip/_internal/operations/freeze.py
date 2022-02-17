@@ -113,7 +113,11 @@ def freeze(
                             yield line
                         continue
 
-                    if line.startswith('-e') or line.startswith('--editable'):
+                    if (
+                        line.startswith('-e')
+                        or not line.startswith('-e')
+                        and line.startswith('--editable')
+                    ):
                         if line.startswith('-e'):
                             line = line[2:].strip()
                         else:
@@ -141,25 +145,22 @@ def freeze(
                     else:
                         line_req_canonical_name = canonicalize_name(
                             line_req.name)
-                        if line_req_canonical_name not in installations:
-                            # either it's not installed, or it is installed
-                            # but has been processed already
-                            if not req_files[line_req.name]:
-                                logger.warning(
-                                    "Requirement file [%s] contains %s, but "
-                                    "package %r is not installed",
-                                    req_file_path,
-                                    COMMENT_RE.sub('', line).strip(),
-                                    line_req.name
-                                )
-                            else:
-                                req_files[line_req.name].append(req_file_path)
-                        else:
+                        if line_req_canonical_name in installations:
                             yield str(installations[
                                 line_req_canonical_name]).rstrip()
                             del installations[line_req_canonical_name]
                             req_files[line_req.name].append(req_file_path)
 
+                        elif not req_files[line_req.name]:
+                            logger.warning(
+                                "Requirement file [%s] contains %s, but "
+                                "package %r is not installed",
+                                req_file_path,
+                                COMMENT_RE.sub('', line).strip(),
+                                line_req.name
+                            )
+                        else:
+                            req_files[line_req.name].append(req_file_path)
         # Warn about requirements that were included multiple times (in a
         # single requirements file or in different requirements files).
         for name, files in six.iteritems(req_files):
@@ -256,9 +257,7 @@ class FrozenRequirement(object):
         #      editable that provide .dist-info metadata.
         req, editable, comments = get_requirement_info(dist)
         if req is None and not editable:
-            # if PEP 610 metadata is present, attempt to use it
-            direct_url = dist_get_direct_url(dist)
-            if direct_url:
+            if direct_url := dist_get_direct_url(dist):
                 req = direct_url_as_pep440_direct_reference(
                     direct_url, dist.project_name
                 )

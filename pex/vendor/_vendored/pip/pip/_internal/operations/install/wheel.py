@@ -215,11 +215,9 @@ def message_about_scripts_not_on_PATH(scripts):
     else:
         msg_lines.append(last_line_fmt.format("these directories"))
 
-    # Add a note if any directory starts with ~
-    warn_for_tilde = any(
+    if warn_for_tilde := any(
         i[0] == "~" for i in os.environ.get("PATH", "").split(os.pathsep) if i
-    )
-    if warn_for_tilde:
+    ):
         tilde_warning_msg = (
             "NOTE: The current PATH contains path(s) starting with `~`, "
             "which may not be expanded by all applications."
@@ -263,12 +261,12 @@ def _record_to_fs_path(record_path):
 
 def _fs_to_record_path(path, relative_to=None):
     # type: (text_type, Optional[text_type]) -> RecordPath
-    if relative_to is not None:
-        # On Windows, do not handle relative paths if they belong to different
-        # logical disks
-        if os.path.splitdrive(path)[0].lower() == \
-                os.path.splitdrive(relative_to)[0].lower():
-            path = os.path.relpath(path, relative_to)
+    if (
+        relative_to is not None
+        and os.path.splitdrive(path)[0].lower()
+        == os.path.splitdrive(relative_to)[0].lower()
+    ):
+        path = os.path.relpath(path, relative_to)
     path = path.replace(os.path.sep, '/')
     return cast('RecordPath', path)
 
@@ -307,8 +305,11 @@ def get_csv_rows_for_installed(
         path = _fs_to_record_path(f, lib_dir)
         digest, length = rehash(f)
         installed_rows.append((path, digest, length))
-    for installed_record_path in itervalues(installed):
-        installed_rows.append((installed_record_path, '', ''))
+    installed_rows.extend(
+        (installed_record_path, '', '')
+        for installed_record_path in itervalues(installed)
+    )
+
     return installed_rows
 
 
@@ -323,43 +324,9 @@ def get_console_script_specs(console):
 
     scripts_to_generate = []
 
-    # Special case pip and setuptools to generate versioned wrappers
-    #
-    # The issue is that some projects (specifically, pip and setuptools) use
-    # code in setup.py to create "versioned" entry points - pip2.7 on Python
-    # 2.7, pip3.3 on Python 3.3, etc. But these entry points are baked into
-    # the wheel metadata at build time, and so if the wheel is installed with
-    # a *different* version of Python the entry points will be wrong. The
-    # correct fix for this is to enhance the metadata to be able to describe
-    # such versioned entry points, but that won't happen till Metadata 2.0 is
-    # available.
-    # In the meantime, projects using versioned entry points will either have
-    # incorrect versioned entry points, or they will not be able to distribute
-    # "universal" wheels (i.e., they will need a wheel per Python version).
-    #
-    # Because setuptools and pip are bundled with _ensurepip and virtualenv,
-    # we need to use universal wheels. So, as a stopgap until Metadata 2.0, we
-    # override the versioned entry points in the wheel and generate the
-    # correct ones. This code is purely a short-term measure until Metadata 2.0
-    # is available.
-    #
-    # To add the level of hack in this section of code, in order to support
-    # ensurepip this code will look for an ``ENSUREPIP_OPTIONS`` environment
-    # variable which will control which version scripts get installed.
-    #
-    # ENSUREPIP_OPTIONS=altinstall
-    #   - Only pipX.Y and easy_install-X.Y will be generated and installed
-    # ENSUREPIP_OPTIONS=install
-    #   - pipX.Y, pipX, easy_install-X.Y will be generated and installed. Note
-    #     that this option is technically if ENSUREPIP_OPTIONS is set and is
-    #     not altinstall
-    # DEFAULT
-    #   - The default behavior is to install pip, pipX, pipX.Y, easy_install
-    #     and easy_install-X.Y.
-    pip_script = console.pop('pip', None)
-    if pip_script:
+    if pip_script := console.pop('pip', None):
         if "ENSUREPIP_OPTIONS" not in os.environ:
-            scripts_to_generate.append('pip = ' + pip_script)
+            scripts_to_generate.append(f'pip = {pip_script}')
 
         if os.environ.get("ENSUREPIP_OPTIONS", "") != "altinstall":
             scripts_to_generate.append(
@@ -373,12 +340,9 @@ def get_console_script_specs(console):
         pip_ep = [k for k in console if re.match(r'pip(\d(\.\d)?)?$', k)]
         for k in pip_ep:
             del console[k]
-    easy_install_script = console.pop('easy_install', None)
-    if easy_install_script:
+    if easy_install_script := console.pop('easy_install', None):
         if "ENSUREPIP_OPTIONS" not in os.environ:
-            scripts_to_generate.append(
-                'easy_install = ' + easy_install_script
-            )
+            scripts_to_generate.append(f'easy_install = {easy_install_script}')
 
         scripts_to_generate.append(
             'easy_install-{} = {}'.format(
@@ -693,10 +657,7 @@ def _install_wheel(
         """Return the path the pyc file would have been written to.
         """
         if PY2:
-            if sys.flags.optimize:
-                return path + 'o'
-            else:
-                return path + 'c'
+            return f'{path}o' if sys.flags.optimize else f'{path}c'
         else:
             return importlib.util.cache_from_source(path)
 

@@ -370,9 +370,7 @@ class PEXBuilder(object):
             TRACER.log("Set entrypoint to console_script {!r} in {!r}".format(entry_point, dist))
             return
 
-        # Check if 'script' is an ordinary script.
-        dist_script = get_script_from_distributions(script, distributions)
-        if dist_script:
+        if dist_script := get_script_from_distributions(script, distributions):
             if self._pex_info.entry_point:
                 raise self.InvalidExecutableSpecification(
                     "Cannot set both entry point and script of PEX!"
@@ -724,7 +722,7 @@ class PEXBuilder(object):
         deterministic_timestamp=False,  # type: bool
     ):
         # type: (...) -> None
-        tmp_zip = filename + "~"
+        tmp_zip = f'{filename}~'
         try:
             os.unlink(tmp_zip)
             self._logger.warning(

@@ -220,8 +220,7 @@ class LinkEvaluator(object):
             reason = 'Missing project version for {}'.format(self.project_name)
             return (False, reason)
 
-        match = self._py_version_re.search(version)
-        if match:
+        if match := self._py_version_re.search(version):
             version = version[:match.start()]
             py_version = match.group(1)
             if py_version != self._target_python.py_version:
@@ -288,12 +287,7 @@ def filter_unallowed_hashes(
 
         matches_or_no_digest.append(candidate)
 
-    if match_count:
-        filtered = matches_or_no_digest
-    else:
-        # Make sure we're not returning back the given value.
-        filtered = list(candidates)
-
+    filtered = matches_or_no_digest if match_count else list(candidates)
     if len(filtered) == len(candidates):
         discard_message = 'discarding no candidates'
     else:
@@ -516,7 +510,6 @@ class CandidateEvaluator(object):
               with the same version, would have to be considered equal
         """
         valid_tags = self._supported_tags
-        support_num = len(valid_tags)
         build_tag = ()  # type: BuildTag
         binary_preference = 0
         link = candidate.link
@@ -536,6 +529,7 @@ class CandidateEvaluator(object):
                 build_tag_groups = match.groups()
                 build_tag = (int(build_tag_groups[0]), build_tag_groups[1])
         else:  # sdist
+            support_num = len(valid_tags)
             pri = -(support_num)
         has_allowed_hash = int(link.is_hash_allowed(self._hashes))
         yank_value = -1 * int(link.is_yanked)  # -1 for yanked.
@@ -553,10 +547,7 @@ class CandidateEvaluator(object):
         Return the best candidate per the instance's sort order, or None if
         no candidate is acceptable.
         """
-        if not candidates:
-            return None
-        best_candidate = max(candidates, key=self._sort_key)
-        return best_candidate
+        return None if not candidates else max(candidates, key=self._sort_key)
 
     def compute_best_candidate(
         self,
