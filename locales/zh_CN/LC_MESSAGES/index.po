@@ -1,0 +1,71 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2022, Pants project contributors
+# This file is distributed under the same license as the pex package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2022.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: pex 2.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-03-31 14:28+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.9.1\n"
+
+#: ../../docs/index.rst:3
+msgid "pex"
+msgstr ""
+
+#: ../../docs/index.rst:4
+msgid ""
+"This project is the home of the .pex file, and the ``pex`` tool which can"
+" create them. ``pex`` also provides a general purpose Python environment-"
+"virtualization solution similar to `virtualenv <http://virtualenv.org>`_."
+" pex is short for \"Python Executable\""
+msgstr ""
+
+#: ../../docs/index.rst:9
+msgid "in brief"
+msgstr ""
+
+#: ../../docs/index.rst:10
+msgid ""
+"To quickly get started building .pex files, go straight to "
+":ref:`buildingpex`. New to python packaging?  Check out "
+"`packaging.python.org <https://packaging.python.org>`_."
+msgstr ""
+
+#: ../../docs/index.rst:14
+msgid "intro & history"
+msgstr ""
+
+#: ../../docs/index.rst:15
+msgid ""
+"pex contains the Python packaging and distribution libraries originally "
+"available through the `twitter commons "
+"<https://github.com/twitter/commons>`_ but since split out into a "
+"separate project. The most notable components of pex are the .pex (Python"
+" EXecutable) format and the associated ``pex`` tool which provide a "
+"general purpose Python environment virtualization solution similar in "
+"spirit to `virtualenv <http://virtualenv.org>`_.  PEX files have been "
+"used by Twitter to deploy Python applications to production since 2011."
+msgstr ""
+
+#: ../../docs/index.rst:21
+msgid ""
+"To learn more about what the .pex format is and why it could be useful "
+"for you, see :ref:`whatispex`  For the impatient, there is also a "
+"(slightly outdated) lightning talk published by Twitter University: `WTF "
+"is PEX? <http://www.youtube.com/watch?v=NmpnGhRwsu0>`_. To go straight to"
+" building pex files, see :ref:`buildingpex`."
+msgstr ""
+
+#: ../../docs/index.rst:27
+msgid "Guide:"
+msgstr ""
+
