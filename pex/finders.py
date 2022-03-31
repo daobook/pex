@@ -7,12 +7,14 @@ import ast
 import os
 
 from pex.common import is_python_script
+from pex.pep_376 import InstalledWheel
 from pex.third_party.pkg_resources import Distribution
 from pex.typing import TYPE_CHECKING, cast
 
 if TYPE_CHECKING:
-    import attr  # vendor:skip
     from typing import Optional
+
+    import attr  # vendor:skip
 else:
     from pex.third_party import attr
 
@@ -26,7 +28,7 @@ class DistributionScript(object):
         name,  # type: str
     ):
         # type: (...) -> Optional[DistributionScript]
-        script_path = os.path.join(dist.location, "bin", name)
+        script_path = InstalledWheel.load(dist.location).stashed_path("bin", name)
         return cls(dist=dist, path=script_path) if os.path.isfile(script_path) else None
 
     dist = attr.ib()  # type: Distribution

@@ -14,8 +14,9 @@ from pex.third_party.packaging.specifiers import SpecifierSet
 from pex.typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    import attr  # vendor:skip
     from typing import Iterable, Iterator, Optional, Tuple
+
+    import attr  # vendor:skip
 
     from pex.interpreter import InterpreterIdentificationError
 else:
@@ -135,7 +136,7 @@ class UnsatisfiableInterpreterConstraintsError(Exception):
         )
 
 
-class Lifecycle(Enum):
+class Lifecycle(Enum["Lifecycle.Value"]):
     class Value(Enum.Value):
         pass
 
@@ -189,7 +190,7 @@ COMPATIBLE_PYTHON_VERSIONS = (
     PythonVersion(Lifecycle.EOL, 3, 5, 10),
     PythonVersion(Lifecycle.EOL, 3, 6, 15),
     PythonVersion(Lifecycle.STABLE, 3, 7, 12),
-    PythonVersion(Lifecycle.STABLE, 3, 8, 11),
+    PythonVersion(Lifecycle.STABLE, 3, 8, 12),
     PythonVersion(Lifecycle.STABLE, 3, 9, 10),
     PythonVersion(Lifecycle.STABLE, 3, 10, 2),
     PythonVersion(Lifecycle.DEV, 3, 11, 0),

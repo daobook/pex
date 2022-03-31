@@ -12,18 +12,15 @@ import pytest
 from pex import resolver
 from pex.common import temporary_dir
 from pex.compatibility import to_bytes
-from pex.distribution_target import DistributionTarget, DistributionTargets
-from pex.environment import (
-    FingerprintedDistribution,
-    PEXEnvironment,
-    _InvalidWheelName,
-    _RankedDistribution,
-)
+from pex.environment import PEXEnvironment, _InvalidWheelName, _RankedDistribution
+from pex.fingerprinted_distribution import FingerprintedDistribution
 from pex.inherit_path import InheritPath
 from pex.interpreter import PythonInterpreter
 from pex.pex import PEX
 from pex.pex_builder import PEXBuilder
 from pex.pex_info import PexInfo
+from pex.rank import Rank
+from pex.targets import LocalInterpreter, Targets
 from pex.testing import (
     IS_LINUX,
     IS_PYPY3,
@@ -137,7 +134,7 @@ def assert_force_local_implicit_ns_packages_issues_598(
     def add_requirements(builder, cache):
         # type: (PEXBuilder, str) -> None
         for installed_dist in resolver.resolve(
-            targets=DistributionTargets(interpreters=(builder.interpreter,)),
+            targets=Targets(interpreters=(builder.interpreter,)),
             requirements=requirements,
             cache=cache,
         ).installed_distributions:
@@ -258,7 +255,7 @@ def test_osx_platform_intel_issue_523():
             interpreter=bad_interpreter()
         ) as pb, temporary_filename() as pex_file:
             for installed_dist in resolver.resolve(
-                targets=DistributionTargets(interpreters=(pb.interpreter,)),
+                targets=Targets(interpreters=(pb.interpreter,)),
                 requirements=["psutil==5.4.3"],
                 cache=cache,
             ).installed_distributions:
@@ -316,7 +313,7 @@ def test_activate_extras_issue_615():
     # type: () -> None
     with yield_pex_builder() as pb:
         for installed_dist in resolver.resolve(
-            targets=DistributionTargets(interpreters=(pb.interpreter,)),
+            targets=Targets(interpreters=(pb.interpreter,)),
             requirements=["pex[requests]==1.6.3"],
         ).installed_distributions:
             for direct_req in installed_dist.direct_requirements:
@@ -388,7 +385,7 @@ def cpython_37_environment(python_37_interpreter):
     return PEXEnvironment(
         pex="",
         pex_info=PexInfo.default(python_37_interpreter),
-        target=DistributionTarget.for_interpreter(python_37_interpreter),
+        target=LocalInterpreter.create(python_37_interpreter),
     )
 
 
@@ -452,7 +449,7 @@ def test_can_add_ranking_platform_tag_more_specific(assert_cpython_37_environmen
     ranked_universal = assert_cpython_37_environment_can_add(
         create_dist("foo-2.0.0-py2.py3-none-any.whl", "2.0.0")
     )
-    assert ranked_specific > ranked_universal
+    assert ranked_specific < ranked_universal
 
     ranked_almost_py3universal = assert_cpython_37_environment_can_add(
         create_dist("foo-2.0.0-py3-none-any.whl", "2.0.0")
@@ -471,19 +468,4 @@ def test_can_add_ranking_version_newer_tie_break(assert_cpython_37_environment_c
     ranked_v2 = assert_cpython_37_environment_can_add(
         create_dist("foo-2.0.0-cp37-cp37m-macosx_10_9_x86_64.linux_x86_64.whl", "2.0.0")
     )
-    assert ranked_v2 > ranked_v1
-
-
-def test_ranking_platform_tag_maximum(cpython_37_environment):
-    # type: (PEXEnvironment) -> None
-    dist = create_dist("foo-1.0.0-cp37-cp37m-macosx_10_9_x86_64.linux_x86_64.whl", "1.0.0")
-
-    minimum_tag_rank = min(cpython_37_environment._supported_tags_to_rank.values())
-    maximum_tag_rank = max(cpython_37_environment._supported_tags_to_rank.values())
-    assert maximum_tag_rank > minimum_tag_rank
-
-    maximum_rank = _RankedDistribution.maximum(dist)
-    bigger_than_naturally_possible_rank = _RankedDistribution(
-        rank=maximum_tag_rank + 1, fingerprinted_distribution=dist
-    )
-    assert maximum_rank > bigger_than_naturally_possible_rank
+    assert ranked_v2 < ranked_v1

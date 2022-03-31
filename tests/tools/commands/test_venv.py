@@ -22,9 +22,9 @@ from pex.interpreter import PythonInterpreter
 from pex.layout import Layout
 from pex.pex_builder import CopyMode, PEXBuilder
 from pex.testing import IS_PYPY, PY310, PY_VER, ensure_python_interpreter, run_pex_command
-from pex.tools.commands.virtualenv import Virtualenv
 from pex.typing import TYPE_CHECKING, cast
 from pex.util import named_temporary_file
+from pex.venv.virtualenv import Virtualenv
 
 if TYPE_CHECKING:
     from typing import Any, Dict, Iterable, Iterator, List, Optional, Protocol, Set, Text, Tuple
@@ -48,11 +48,20 @@ def pex():
         touch(os.path.join(src_dir, "user/__init__.py"))
         touch(os.path.join(src_dir, "user/package/__init__.py"))
 
+        # Fabric dips into Invoke vendored code. It depends on "invoke<2.0,>=1.3", but in version
+        # 1.7.0, the vendored `decorator` module Fabric depends on inside Invoke no longer is
+        # importable under Python 2.7; so we pin low.
+        constraints = os.path.join(tmpdir, "constraints.txt")
+        with open(constraints, "w") as fp:
+            fp.write("Invoke==1.6.0")
+
         # N.B.: --unzip just speeds up runs 2+ of the pex file and is otherwise not relevant to
         # these tests.
         run_pex_command(
             args=[
                 "fabric=={}".format(FABRIC_VERSION),
+                "--constraints",
+                constraints,
                 "-c",
                 "fab",
                 "--sources-directory",

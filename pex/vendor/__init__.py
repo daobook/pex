@@ -10,7 +10,6 @@ import sys
 from textwrap import dedent
 
 from pex.common import filter_pyc_dirs, filter_pyc_files, safe_mkdtemp, touch
-from pex.compatibility import urlparse
 from pex.tracer import TRACER
 from pex.typing import TYPE_CHECKING
 
@@ -28,7 +27,9 @@ def _root():
 
 
 class VendorSpec(
-    collections.namedtuple("VendorSpec", ["key", "requirement", "rewrite", "constrain"])
+    collections.namedtuple(
+        "VendorSpec", ["key", "requirement", "rewrite", "constrain", "constraints"]
+    )
 ):
     """Represents a vendored distribution.
 
@@ -39,6 +40,7 @@ class VendorSpec(
       `pex.third_party` importer.
     :field bool constrain: Whether to attempt to constrain the requirement via pip's --constraint
       mechanism.
+    :field constraints: An optional list of extra constraints on the vendored requirement.
 
     NB: Vendored distributions should comply with the host distribution platform constraints. In the
     case of pex, which is a py2.py3 platform agnostic wheel, vendored libraries should be as well.
@@ -53,18 +55,28 @@ class VendorSpec(
         return os.path.join(cls.ROOT, *(_PACKAGE_COMPONENTS + [cls._VENDOR_DIR]))
 
     @classmethod
-    def pinned(cls, key, version, rewrite=True):
+    def pinned(cls, key, version, rewrite=True, constraints=None):
         return cls(
-            key=key, requirement="{}=={}".format(key, version), rewrite=rewrite, constrain=True
+            key=key,
+            requirement="{}=={}".format(key, version),
+            rewrite=rewrite,
+            constrain=True,
+            constraints=constraints,
         )
 
     @classmethod
-    def git(cls, repo, commit, project_name, prep_command=None, rewrite=True):
+    def git(cls, repo, commit, project_name, prep_command=None, rewrite=True, constraints=None):
         requirement = "git+{repo}@{commit}#egg={project_name}".format(
             repo=repo, commit=commit, project_name=project_name
         )
         if not prep_command:
-            return cls(key=project_name, requirement=requirement, rewrite=rewrite, constrain=False)
+            return cls(
+                key=project_name,
+                requirement=requirement,
+                rewrite=rewrite,
+                constrain=False,
+                constraints=constraints,
+            )
 
         class PreparedGit(VendorSpec):
             def prepare(self):
@@ -83,6 +95,7 @@ class VendorSpec(
             requirement=requirement,
             rewrite=rewrite,
             constrain=False,
+            constraints=constraints,
         )
 
     @property
@@ -135,17 +148,24 @@ def iter_vendor_specs():
 
     # We use this via pex.third_party at runtime to check for compatible wheel tags and at build
     # time to implement resolving distributions from a PEX repository.
-    yield VendorSpec.pinned("packaging", "20.8")
+    yield VendorSpec.pinned("packaging", "20.9", constraints=("pyparsing<3",))
 
     # We shell out to pip at buildtime to resolve and install dependencies.
     # N.B.: We're currently using a patched version of Pip 20.3.4 housed at
-    # https://github.com/pantsbuild/pip/tree/pex/patches/generation-2. The patch works around a bug
-    # in `pip download --constraint...` tracked at https://github.com/pypa/pip/issues/9283 and fixed
-    # by https://github.com/pypa/pip/pull/9301 there and https://github.com/pantsbuild/pip/pull/8 in
-    # our fork.
+    # https://github.com/pantsbuild/pip/tree/pex/patches/generation-2.
+    # It has 2 patches:
+    # 1.) https://github.com/pantsbuild/pip/commit/06f462537c981116c763c1ba40cf40e9dd461bcf
+    #     The patch works around a bug in `pip download --constraint...` tracked at
+    #     https://github.com/pypa/pip/issues/9283 and fixed by https://github.com/pypa/pip/pull/9301
+    #     there and https://github.com/pantsbuild/pip/pull/8 in our fork.
+    # 2.) https://github.com/pantsbuild/pip/commit/386a54f097ece66775d0c7f34fd29bb596c6b0be
+    #     This is a cherry-pick of
+    #     https://github.com/pantsbuild/pip/commit/00fb5a0b224cde08e3e5ca034247baadfb646468
+    #     (https://github.com/pypa/pip/pull/9533) from upstream that upgrades Pip's vendored
+    #     packaging to 20.9 to pick up support for mac universal2 wheels.
     yield VendorSpec.git(
         repo="https://github.com/pantsbuild/pip",
-        commit="de1c91261f2b54d60fdf2a17fba756ef0decb146",
+        commit="386a54f097ece66775d0c7f34fd29bb596c6b0be",
         project_name="pip",
         rewrite=False,
     )
@@ -189,7 +209,7 @@ def iter_vendor_specs():
     )
 
     # We expose this to pip at buildtime for legacy builds.
-    yield VendorSpec.pinned("wheel", "0.36.2", rewrite=False)
+    yield VendorSpec.pinned("wheel", "0.37.1", rewrite=False)
 
 
 def vendor_runtime(chroot, dest_basedir, label, root_module_names, include_dist_info=False):

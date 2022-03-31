@@ -14,7 +14,6 @@ from pex.common import (
     atomic_directory,
     chmod_plus_x,
     is_pyc_temporary_file,
-    open_zip,
     safe_copy,
     safe_mkdir,
     safe_mkdtemp,
@@ -24,15 +23,16 @@ from pex.common import (
 )
 from pex.compatibility import to_bytes
 from pex.compiler import Compiler
-from pex.distribution_target import DistributionTarget
 from pex.enum import Enum
+from pex.environment import PEXEnvironment
 from pex.finders import get_entry_point_from_console_script, get_script_from_distributions
 from pex.interpreter import PythonInterpreter
 from pex.layout import Layout
 from pex.orderedset import OrderedSet
 from pex.pex import PEX
 from pex.pex_info import PexInfo
-from pex.pip import get_pip
+from pex.pip.tool import get_pip
+from pex.targets import LocalInterpreter
 from pex.third_party.pkg_resources import DefaultProvider, Distribution, ZipProvider, get_provider
 from pex.tracer import TRACER
 from pex.typing import TYPE_CHECKING
@@ -298,29 +298,13 @@ class PEXBuilder(object):
         """
         self._ensure_unfrozen("Adding from pex")
         pex_info = PexInfo.from_pex(pex)
-
-        def add(location, dname, expected_dhash):
-            dhash = self._add_dist_dir(location, dname)
-            if dhash != expected_dhash:
-                raise self.InvalidDistribution(
-                    "Distribution {} at {} had hash {}, expected {}".format(
-                        dname, location, dhash, expected_dhash
-                    )
-                )
-            self._pex_info.add_distribution(dname, dhash)
-
-        if os.path.isfile(pex):
-            with open_zip(pex) as zf:
-                for dist_name, dist_hash in pex_info.distributions.items():
-                    internal_dist_path = "/".join([pex_info.internal_cache, dist_name])
-                    cached_location = os.path.join(pex_info.install_cache, dist_hash, dist_name)
-                    CacheHelper.cache_distribution(zf, internal_dist_path, cached_location)
-                    add(cached_location, dist_name, dist_hash)
-        else:
-            for dist_name, dist_hash in pex_info.distributions.items():
-                add(os.path.join(pex, pex_info.internal_cache, dist_name), dist_name, dist_hash)
-        for req in pex_info.requirements:
-            self._pex_info.add_requirement(req)
+        pex_environment = PEXEnvironment.mount(pex, pex_info=pex_info)
+        for fingerprinted_dist in pex_environment.iter_distributions():
+            self.add_distribution(
+                dist=fingerprinted_dist.distribution, fingerprint=fingerprinted_dist.fingerprint
+            )
+        for requirement in pex_info.requirements:
+            self.add_requirement(requirement)
 
     def set_executable(self, filename, env_filename=None):
         """Set the executable for this environment.
@@ -433,7 +417,7 @@ class PEXBuilder(object):
             get_pip(interpreter=self._interpreter).spawn_install_wheel(
                 wheel=path,
                 install_dir=install_dir,
-                target=DistributionTarget.for_interpreter(self.interpreter),
+                target=LocalInterpreter.create(self.interpreter),
             ).wait()
             return self._add_dist_dir(install_dir, dist_name, fingerprint=fingerprint)
 
@@ -489,7 +473,7 @@ class PEXBuilder(object):
             get_pip(interpreter=self._interpreter).spawn_install_wheel(
                 wheel=dist,
                 install_dir=dist_path,
-                target=DistributionTarget.for_interpreter(self.interpreter),
+                target=LocalInterpreter.create(self.interpreter),
             ).wait()
 
         dist = DistributionHelper.distribution_from_path(dist_path)
@@ -575,7 +559,7 @@ class PEXBuilder(object):
             provider = ZipProvider(mod)
 
         bootstrap_digest = hashlib.sha1()
-        bootstrap_packages = ["", "third_party"]
+        bootstrap_packages = ["", "third_party", "venv"]
         if self._pex_info.includes_tools:
             bootstrap_packages.extend(["commands", "tools", "tools/commands"])
         for package in bootstrap_packages:
@@ -641,7 +625,7 @@ class PEXBuilder(object):
             # building to a single non-PEX_ROOT user-requested output path; so we don't grab an
             # exclusive lock and dirty the target directory with a `.lck` file.
             with atomic_directory(path, source="app", exclusive=False) as app_chroot:
-                if not app_chroot.is_finalized:
+                if not app_chroot.is_finalized():
                     dirname = os.path.join(app_chroot.work_dir, "app")
                     if layout == Layout.LOOSE:
                         shutil.copytree(self.path(), dirname)
@@ -680,7 +664,7 @@ class PEXBuilder(object):
         with atomic_directory(
             cached_bootstrap_zip_dir, exclusive=False
         ) as atomic_bootstrap_zip_dir:
-            if not atomic_bootstrap_zip_dir.is_finalized:
+            if not atomic_bootstrap_zip_dir.is_finalized():
                 self._chroot.zip(
                     os.path.join(atomic_bootstrap_zip_dir.work_dir, pex_info.bootstrap),
                     deterministic_timestamp=deterministic_timestamp,
@@ -705,7 +689,7 @@ class PEXBuilder(object):
                 with atomic_directory(
                     cached_installed_wheel_zip_dir, exclusive=False
                 ) as atomic_zip_dir:
-                    if not atomic_zip_dir.is_finalized:
+                    if not atomic_zip_dir.is_finalized():
                         self._chroot.zip(
                             os.path.join(atomic_zip_dir.work_dir, location),
                             deterministic_timestamp=deterministic_timestamp,

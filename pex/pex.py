@@ -17,7 +17,6 @@ from pex import third_party
 from pex.bootstrap import Bootstrap
 from pex.common import die
 from pex.compatibility import PY3
-from pex.distribution_target import DistributionTarget
 from pex.environment import PEXEnvironment
 from pex.executor import Executor
 from pex.finders import get_entry_point_from_console_script, get_script_from_distributions
@@ -25,6 +24,7 @@ from pex.inherit_path import InheritPath
 from pex.interpreter import PythonInterpreter
 from pex.orderedset import OrderedSet
 from pex.pex_info import PexInfo
+from pex.targets import LocalInterpreter
 from pex.third_party.pkg_resources import Distribution, EntryPoint, find_distributions
 from pex.tracer import TRACER
 from pex.typing import TYPE_CHECKING
@@ -79,11 +79,12 @@ class PEX(object):  # noqa: T000
         if verify_entry_point:
             self._do_entry_point_verification()
 
-    def pex_info(self):
-        # type: () -> PexInfo
+    def pex_info(self, include_env_overrides=True):
+        # type: (bool) -> PexInfo
         pex_info = self._pex_info.copy()
-        pex_info.update(self._pex_info_overrides)
-        pex_info.merge_pex_path(self._vars.PEX_PATH)
+        if include_env_overrides:
+            pex_info.update(self._pex_info_overrides)
+            pex_info.merge_pex_path(self._vars.PEX_PATH)
         return pex_info
 
     @property
@@ -97,7 +98,7 @@ class PEX(object):  # noqa: T000
         if self._envs is None:
             # set up the local .pex environment
             pex_info = self.pex_info()
-            target = DistributionTarget.for_interpreter(self._interpreter)
+            target = LocalInterpreter.create(self._interpreter)
             envs = [PEXEnvironment.mount(self._pex, pex_info, target=target)]
             # N.B. by this point, `pex_info.pex_path` will contain a single pex path
             # merged from pex_path in `PEX-INFO` and `PEX_PATH` set in the environment.
@@ -114,8 +115,15 @@ class PEX(object):  # noqa: T000
 
     def resolve(self):
         # type: () -> Iterator[Distribution]
+        """Resolves all distributions loadable from this PEX by the current interpreter."""
+        seen = set()
         for env in self._loaded_envs:
             for dist in env.resolve():
+                # N.B.: Since there can be more than one PEX env on the PEX_PATH we take care to
+                # de-dup distributions they have in common.
+                if dist in seen:
+                    continue
+                seen.add(dist)
                 yield dist
 
     def _activate(self):
@@ -473,6 +481,26 @@ class PEX(object):  # noqa: T000
                 exit_value = tools.main(pex=PEX(sys.argv[0]))
             else:
                 self.activate()
+
+                pex_file = os.environ.get("PEX", None)
+                if pex_file:
+                    try:
+                        from setproctitle import setproctitle  # type: ignore[import]
+
+                        setproctitle(
+                            "{python} {pex_file} {args}".format(
+                                python=sys.executable,
+                                pex_file=pex_file,
+                                args=" ".join(sys.argv[1:]),
+                            )
+                        )
+                    except ImportError:
+                        TRACER.log(
+                            "Not setting process title since setproctitle is not available in "
+                            "{pex_file}".format(pex_file=pex_file),
+                            V=3,
+                        )
+
                 exit_value = self._wrap_coverage(self._wrap_profiling, self._execute)
             sys.exit(exit_value)
         except Exception:

@@ -7,10 +7,11 @@ import logging
 from argparse import ArgumentParser
 
 from pex import pex_bootstrapper
-from pex.commands.command import Error, JsonMixin, Ok, OutputMixin, Result
+from pex.commands.command import JsonMixin, OutputMixin
 from pex.interpreter import PythonInterpreter
 from pex.interpreter_constraints import UnsatisfiableInterpreterConstraintsError
 from pex.pex import PEX
+from pex.result import Error, Ok, Result
 from pex.tools.command import PEXCommand
 from pex.typing import TYPE_CHECKING
 from pex.variables import ENV
@@ -85,11 +86,13 @@ class Interpreter(JsonMixin, OutputMixin, PEXCommand):
                             "platform": str(interpreter.platform),
                         }  # type: Dict[str, Any]
                         if self.options.verbose >= 2:
-                            interpreter_info["supported_tags"] = [
-                                str(tag) for tag in interpreter.identity.supported_tags
-                            ]
+                            interpreter_info[
+                                "supported_tags"
+                            ] = interpreter.identity.supported_tags.to_string_list()
                         if self.options.verbose >= 3:
-                            interpreter_info["env_markers"] = interpreter.identity.env_markers
+                            interpreter_info[
+                                "env_markers"
+                            ] = interpreter.identity.env_markers.as_dict()
                             interpreter_info["venv"] = interpreter.is_venv
                             if interpreter.is_venv:
                                 interpreter_info[

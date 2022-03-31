@@ -21,7 +21,7 @@ from pex.dist_metadata import (
     requires_python,
 )
 from pex.pex_warnings import PEXWarning
-from pex.pip import get_pip
+from pex.pip.tool import get_pip
 from pex.third_party.packaging.specifiers import SpecifierSet
 from pex.third_party.pkg_resources import Distribution, Requirement
 from pex.typing import TYPE_CHECKING
@@ -29,7 +29,7 @@ from pex.util import DistributionHelper
 from pex.variables import ENV
 
 if TYPE_CHECKING:
-    from typing import Tuple, Iterator, Any
+    from typing import Any, Iterator, Tuple
 
 
 @contextmanager

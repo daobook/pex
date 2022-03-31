@@ -10,17 +10,18 @@ import threading
 from argparse import ArgumentParser
 from contextlib import contextmanager
 
-from pex.commands.command import Ok, OutputMixin, Result, try_open_file, try_run_program
+from pex.commands.command import OutputMixin, try_open_file, try_run_program
 from pex.common import safe_mkdir
 from pex.dist_metadata import requires_dists
 from pex.pex import PEX
+from pex.result import Ok, Result
 from pex.tools.command import PEXCommand
 from pex.tools.commands.digraph import DiGraph
 from pex.typing import TYPE_CHECKING
 from pex.variables import ENV
 
 if TYPE_CHECKING:
-    from typing import Iterator, IO, Tuple
+    from typing import IO, Iterator, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +40,7 @@ class Graph(OutputMixin, PEXCommand):
                 pex.path(), pex.interpreter.binary, pex.interpreter.identity.requirement
             ),
         )
-        marker_environment = pex.interpreter.identity.env_markers.copy()
+        marker_environment = pex.interpreter.identity.env_markers.as_dict()
         marker_environment["extra"] = ""
         present_dists = frozenset(dist.project_name for dist in pex.resolve())
         for dist in pex.resolve():

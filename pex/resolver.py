@@ -5,58 +5,93 @@
 from __future__ import absolute_import
 
 import functools
+import hashlib
 import itertools
 import os
 import zipfile
 from collections import OrderedDict, defaultdict
 
+from pex import targets
 from pex.common import AtomicDirectory, atomic_directory, pluralize, safe_mkdtemp
 from pex.dist_metadata import DistMetadata
-from pex.distribution_target import DistributionTarget, DistributionTargets
-from pex.environment import FingerprintedDistribution
+from pex.fetcher import URLFetcher
+from pex.fingerprinted_distribution import FingerprintedDistribution
 from pex.jobs import Raise, SpawnedJob, execute_parallel
 from pex.network_configuration import NetworkConfiguration
 from pex.orderedset import OrderedSet
 from pex.pep_503 import ProjectName, distribution_satisfies_requirement
 from pex.pex_info import PexInfo
-from pex.pip import Locker, PackageIndexConfiguration, get_pip
+from pex.pip.tool import PackageIndexConfiguration, get_pip
 from pex.requirements import LocalProjectRequirement
-from pex.resolve.locked_resolve import LockConfiguration, LockedResolve
+from pex.resolve.locked_resolve import LockConfiguration, LockedResolve, LockRequest
 from pex.resolve.requirement_configuration import RequirementConfiguration
+from pex.resolve.resolved_requirement import ResolvedRequirement
 from pex.resolve.resolver_configuration import ResolverVersion
-from pex.resolve.resolvers import InstalledDistribution, Resolved, Unsatisfiable, Untranslatable
+from pex.resolve.resolvers import Installed, InstalledDistribution, Unsatisfiable, Untranslatable
+from pex.targets import Target, Targets
 from pex.third_party.pkg_resources import Requirement
 from pex.tracer import TRACER
 from pex.typing import TYPE_CHECKING
 from pex.util import CacheHelper, DistributionHelper
 
 if TYPE_CHECKING:
+    from typing import DefaultDict, Iterable, Iterator, List, Mapping, Optional, Sequence, Tuple
+
     import attr  # vendor:skip
-    from typing import (
-        DefaultDict,
-        Dict,
-        Iterable,
-        Iterator,
-        List,
-        Mapping,
-        Optional,
-        Sequence,
-        Tuple,
-    )
 
     from pex.requirements import ParsedRequirement
 else:
     from pex.third_party import attr
 
 
+@attr.s
+class _ResolveHandler(object):
+    download_result = attr.ib()  # type: DownloadResult
+    wheel_builder = attr.ib()  # type: WheelBuilder
+    url_fetcher = attr.ib()  # type: URLFetcher
+    max_parallel_jobs = attr.ib(default=None)  # type: Optional[int]
+
+    def __call__(self, resolved_requirements):
+        # type: (Iterable[ResolvedRequirement]) -> None
+        self._resolved_requirements = resolved_requirements
+
+    def lock(self):
+        # type: () -> DownloadResult
+
+        build_requests = tuple(self.download_result.build_requests())
+        with TRACER.timed(
+            "Building {count} source {distributions} to gather metadata for lock.".format(
+                count=len(build_requests), distributions=pluralize(build_requests, "distribution")
+            )
+        ):
+            build_results = self.wheel_builder.build_wheels(
+                build_requests=build_requests,
+                max_parallel_jobs=self.max_parallel_jobs,
+            )
+            dist_metadatas = tuple(
+                DistMetadata.for_dist(install_request.wheel_path)
+                for install_request in itertools.chain(
+                    tuple(self.download_result.install_requests()),
+                    itertools.chain.from_iterable(build_results.values()),
+                )
+            )
+        locked_resolve = LockedResolve.create(
+            self.download_result.target.platform.tag,
+            self._resolved_requirements,
+            dist_metadatas,
+            self.url_fetcher,
+        )
+        return attr.evolve(self.download_result, locked_resolve=locked_resolve)
+
+
 def _uniqued_targets(targets=None):
-    # type: (Optional[Iterable[DistributionTarget]]) -> Tuple[DistributionTarget, ...]
+    # type: (Optional[Iterable[Target]]) -> Tuple[Target, ...]
     return tuple(OrderedSet(targets)) if targets is not None else ()
 
 
 @attr.s(frozen=True)
 class DownloadRequest(object):
-    targets = attr.ib(converter=_uniqued_targets)  # type: Tuple[DistributionTarget, ...]
+    targets = attr.ib(converter=_uniqued_targets)  # type: Tuple[Target, ...]
     direct_requirements = attr.ib()  # type: Iterable[ParsedRequirement]
     requirements = attr.ib(default=None)  # type: Optional[Iterable[str]]
     requirement_files = attr.ib(default=None)  # type: Optional[Iterable[str]]
@@ -101,21 +136,36 @@ class DownloadRequest(object):
         self,
         resolved_dists_dir,  # type: str
         max_parallel_jobs,  # type: Optional[int]
-        target,  # type: DistributionTarget
+        target,  # type: Target
     ):
         # type: (...) -> SpawnedJob[DownloadResult]
         download_dir = os.path.join(resolved_dists_dir, target.id)
-        locker = (
-            Locker(
-                target=target,
-                lock_configuration=self.lock_configuration,
-                network_configuration=self.package_index_configuration.network_configuration
+        download_result = DownloadResult(target, download_dir)
+
+        resolve_handler = None  # type: Optional[_ResolveHandler]
+        resolve_request = None  # type: Optional[LockRequest]
+        if self.lock_configuration:
+            network_configuration = (
+                self.package_index_configuration.network_configuration
                 if self.package_index_configuration
-                else None,
+                else NetworkConfiguration()
             )
-            if self.lock_configuration
-            else None
-        )
+            resolve_handler = _ResolveHandler(
+                download_result=download_result,
+                wheel_builder=WheelBuilder(
+                    package_index_configuration=self.package_index_configuration,
+                    cache=self.cache,
+                    prefer_older_binary=self.prefer_older_binary,
+                    use_pep517=self.use_pep517,
+                    build_isolation=self.build_isolation,
+                ),
+                url_fetcher=URLFetcher(network_configuration, handle_file_urls=True),
+                max_parallel_jobs=max_parallel_jobs,
+            )
+            resolve_request = LockRequest(
+                lock_configuration=self.lock_configuration, resolve_handler=resolve_handler
+            )
+
         download_job = get_pip(interpreter=target.get_interpreter()).spawn_download_distributions(
             download_dir=download_dir,
             requirements=self.requirements,
@@ -131,58 +181,11 @@ class DownloadRequest(object):
             prefer_older_binary=self.prefer_older_binary,
             use_pep517=self.use_pep517,
             build_isolation=self.build_isolation,
-            locker=locker,
+            lock_request=resolve_request,
         )
 
-        wheel_builder = WheelBuilder(
-            package_index_configuration=self.package_index_configuration,
-            cache=self.cache,
-            prefer_older_binary=self.prefer_older_binary,
-            use_pep517=self.use_pep517,
-            build_isolation=self.build_isolation,
-        )
-
-        def result_func():
-            return DownloadResult(target, download_dir)
-
-        if locker:
-            result_func = functools.partial(
-                self._finalize_lock,
-                locker=locker,
-                download_result=result_func(),
-                wheel_builder=wheel_builder,
-                max_parallel_jobs=max_parallel_jobs,
-            )
-
+        result_func = resolve_handler.lock if resolve_handler else lambda: download_result
         return SpawnedJob.and_then(job=download_job, result_func=result_func)
-
-    @staticmethod
-    def _finalize_lock(
-        locker,  # type: Locker
-        download_result,  # type: DownloadResult
-        wheel_builder,  # type: WheelBuilder
-        max_parallel_jobs,  # type: Optional[int]
-    ):
-        # type: (...) -> DownloadResult
-
-        build_requests = tuple(download_result.build_requests())
-        with TRACER.timed(
-            "Building {count} source {distributions} to gather metadata for lock.".format(
-                count=len(build_requests), distributions=pluralize(build_requests, "distribution")
-            )
-        ):
-            build_results = wheel_builder.build_wheels(
-                build_requests=build_requests,
-                max_parallel_jobs=max_parallel_jobs,
-            )
-            dist_metadatas = tuple(
-                DistMetadata.for_dist(install_request.wheel_path)
-                for install_request in itertools.chain(
-                    tuple(download_result.install_requests()),
-                    build_results.values(),
-                )
-            )
-        return attr.evolve(download_result, locked_resolve=locker.lock(dist_metadatas))
 
 
 @attr.s(frozen=True)
@@ -192,7 +195,7 @@ class DownloadResult(object):
         # type: (str) -> bool
         return os.path.isfile(path) and path.endswith(".whl")
 
-    target = attr.ib()  # type: DistributionTarget
+    target = attr.ib()  # type: Target
     download_dir = attr.ib()  # type: str
     locked_resolve = attr.ib(default=None)  # type: Optional[LockedResolve]
 
@@ -222,9 +225,24 @@ class IntegrityError(Exception):
 
 def fingerprint_path(path):
     # type: (str) -> str
+
+    # We switched from sha1 to sha256 at the transition from using `pip install --target` to
+    # `pip install --prefix` to serve two purposes:
+    # 1. Insulate the new installation scheme from the old.
+    # 2. Move past sha1 which was shown to have practical collision attacks in 2019.
+    #
+    # The installation scheme switch was the primary purpose and switching hashes proved a pragmatic
+    # insulation. If the `pip install --prefix` re-arrangement scheme evolves, then some other
+    # option than switching hashing algorithms will be needed, like post-fixing a running version
+    # integer or just mixing one into the hashed content.
+    #
+    # See: https://github.com/pantsbuild/pex/issues/1655 for a general overview of these cache
+    # structure concerns.
+    hasher = hashlib.sha256
+
     if os.path.isdir(path):
-        return CacheHelper.dir_hash(path)
-    return CacheHelper.hash(path)
+        return CacheHelper.dir_hash(path, hasher=hasher)
+    return CacheHelper.hash(path, hasher=hasher)
 
 
 @attr.s(frozen=True)
@@ -232,7 +250,7 @@ class BuildRequest(object):
     @classmethod
     def create(
         cls,
-        target,  # type: DistributionTarget
+        target,  # type: Target
         source_path,  # type: str
     ):
         # type: (...) -> BuildRequest
@@ -254,7 +272,7 @@ class BuildRequest(object):
             )
         return request
 
-    target = attr.ib()  # type: DistributionTarget
+    target = attr.ib()  # type: Target
     source_path = attr.ib()  # type: str
     fingerprint = attr.ib()  # type: str
 
@@ -298,7 +316,7 @@ class BuildResult(object):
     @property
     def is_built(self):
         # type: () -> bool
-        return self._atomic_dir.is_finalized
+        return self._atomic_dir.is_finalized()
 
     @property
     def build_dir(self):
@@ -349,14 +367,14 @@ class InstallRequest(object):
     @classmethod
     def create(
         cls,
-        target,  # type: DistributionTarget
+        target,  # type: Target
         wheel_path,  # type: str
     ):
         # type: (...) -> InstallRequest
         fingerprint = fingerprint_path(wheel_path)
         return cls(target=target, wheel_path=wheel_path, fingerprint=fingerprint)
 
-    target = attr.ib()  # type: DistributionTarget
+    target = attr.ib()  # type: Target
     wheel_path = attr.ib()  # type: str
     fingerprint = attr.ib()  # type: str
 
@@ -395,7 +413,7 @@ class InstallResult(object):
     @property
     def is_installed(self):
         # type: () -> bool
-        return self._atomic_dir.is_finalized
+        return self._atomic_dir.is_finalized()
 
     @property
     def build_chroot(self):
@@ -462,10 +480,10 @@ class InstallResult(object):
         # pex:   * - paths that do not exist or will be imported via zipimport
         # pex.pex 2.0.2
         #
-        wheel_dir_hash = CacheHelper.dir_hash(self.install_chroot)
+        wheel_dir_hash = fingerprint_path(self.install_chroot)
         runtime_key_dir = os.path.join(self._installation_root, wheel_dir_hash)
         with atomic_directory(runtime_key_dir, exclusive=False) as atomic_dir:
-            if not atomic_dir.is_finalized:
+            if not atomic_dir.is_finalized():
                 # Note: Create a relative path symlink between the two directories so that the
                 # PEX_ROOT can be used within a chroot environment where the prefix of the path may
                 # change between programs running inside and outside of the chroot.
@@ -516,9 +534,11 @@ class WheelBuilder(object):
         build_requests,  # type: Iterable[BuildRequest]
         dist_root,  # type: str
     ):
-        # type: (...) -> Tuple[Iterable[BuildRequest], Dict[str, InstallRequest]]
+        # type: (...) -> Tuple[Iterable[BuildRequest], DefaultDict[str, OrderedSet[InstallRequest]]]
         unsatisfied_build_requests = []
-        build_results = {}  # type: Dict[str, InstallRequest]
+        build_results = defaultdict(
+            OrderedSet
+        )  # type: DefaultDict[str, OrderedSet[InstallRequest]]
         for build_request in build_requests:
             build_result = build_request.result(dist_root)
             if not build_result.is_built:
@@ -532,7 +552,7 @@ class WheelBuilder(object):
                         build_request.source_path, build_result.dist_dir
                     )
                 )
-                build_results[build_request.source_path] = build_result.finalize_build()
+                build_results[build_request.source_path].add(build_result.finalize_build())
         return unsatisfied_build_requests, build_results
 
     def _spawn_wheel_build(
@@ -561,7 +581,7 @@ class WheelBuilder(object):
         workspace=None,  # type: Optional[str]
         max_parallel_jobs=None,  # type: Optional[int]
     ):
-        # type: (...) -> Mapping[str, InstallRequest]
+        # type: (...) -> Mapping[str, OrderedSet[InstallRequest]]
 
         if not build_requests:
             # Nothing to build or install.
@@ -585,7 +605,7 @@ class WheelBuilder(object):
                 error_handler=Raise(Untranslatable),
                 max_jobs=max_parallel_jobs,
             ):
-                build_results[build_result.request.source_path] = build_result.finalize_build()
+                build_results[build_result.request.source_path].add(build_result.finalize_build())
 
         return build_results
 
@@ -633,14 +653,16 @@ class BuildAndInstallRequest(object):
                 TRACER.log(
                     "Installing {} in {}".format(
                         install_request.wheel_path, install_result.install_chroot
-                    )
+                    ),
+                    V=2,
                 )
                 unsatisfied_install_requests.append(install_request)
             else:
                 TRACER.log(
                     "Using cached installation of {} at {}".format(
                         install_request.wheel_file, install_result.install_chroot
-                    )
+                    ),
+                    V=2,
                 )
                 install_results.append(install_result)
         return unsatisfied_install_requests, install_results
@@ -688,7 +710,7 @@ class BuildAndInstallRequest(object):
             workspace=workspace,
             max_parallel_jobs=max_parallel_jobs,
         )
-        to_install.extend(build_results.values())
+        to_install.extend(itertools.chain.from_iterable(build_results.values()))
 
         # 2. All requirements are now in wheel form: calculate any missing direct requirement
         #    project names from the wheel names.
@@ -704,8 +726,8 @@ class BuildAndInstallRequest(object):
                         yield requirement.requirement
                         continue
 
-                    install_req = build_results.get(requirement.path)
-                    if install_req is None:
+                    install_reqs = build_results.get(requirement.path)
+                    if not install_reqs:
                         raise AssertionError(
                             "Failed to compute a project name for {requirement}. No corresponding "
                             "wheel was found from amongst:\n{install_requests}".format(
@@ -717,12 +739,14 @@ class BuildAndInstallRequest(object):
                                             wheel_path=build_result.wheel_path,
                                             fingerprint=build_result.fingerprint,
                                         )
-                                        for path, build_result in build_results.items()
+                                        for path, build_results in build_results.items()
+                                        for build_result in build_results
                                     )
                                 ),
                             )
                         )
-                    yield requirement.as_requirement(dist=install_req.wheel_path)
+                    for install_req in install_reqs:
+                        yield requirement.as_requirement(dist=install_req.wheel_path)
 
             direct_requirements_by_project_name = defaultdict(
                 OrderedSet
@@ -753,7 +777,7 @@ class BuildAndInstallRequest(object):
             installations.extend(install_result.finalize_install(install_requests))
 
         with TRACER.timed(
-            "Installing:" "\n  {}".format("\n  ".join(map(str, representative_install_requests)))
+            "Installing {} distributions".format(len(representative_install_requests))
         ):
             install_requests, install_results = self._categorize_install_requests(
                 install_requests=representative_install_requests,
@@ -771,7 +795,8 @@ class BuildAndInstallRequest(object):
                 add_installation(install_result)
 
         if not ignore_errors:
-            self._check_install(installations)
+            with TRACER.timed("Checking install"):
+                self._check_install(installations)
 
         installed_distributions = OrderedSet()  # type: OrderedSet[InstalledDistribution]
         for installed_distribution in installations:
@@ -847,7 +872,7 @@ def _parse_reqs(
 
 
 def resolve(
-    targets=DistributionTargets(),  # type: DistributionTargets
+    targets=Targets(),  # type: Targets
     requirements=None,  # type: Optional[Iterable[str]]
     requirement_files=None,  # type: Optional[Iterable[str]]
     constraint_files=None,  # type: Optional[Iterable[str]]
@@ -869,7 +894,7 @@ def resolve(
     verify_wheels=True,  # type: bool
     lock_configuration=None,  # type: Optional[LockConfiguration]
 ):
-    # type: (...) -> Resolved
+    # type: (...) -> Installed
     """Resolves all distributions needed to meet requirements for multiple distribution targets.
 
     The resulting distributions are installed in individual chroots that can be independently added
@@ -913,7 +938,7 @@ def resolve(
     :keyword ignore_errors: Whether to ignore resolution solver errors. Defaults to ``False``.
     :keyword verify_wheels: Whether to verify wheels have valid metadata. Defaults to ``True``.
     :keyword lock_configuration: If a lock should be generated for the resolve - its configuration.
-    :returns: The resolved distributions meeting all requirements and constraints.
+    :returns: The installed distributions meeting all requirements and constraints.
     :raises Unsatisfiable: If ``requirements`` is not transitively satisfiable.
     :raises Untranslatable: If no compatible distributions could be acquired for
       a particular requirement.
@@ -1005,11 +1030,11 @@ def resolve(
             ignore_errors=ignore_errors, workspace=workspace, max_parallel_jobs=max_parallel_jobs
         )
     )
-    return Resolved(installed_distributions=installed_distributions, locks=tuple(locks))
+    return Installed(installed_distributions=installed_distributions, locks=tuple(locks))
 
 
 def _download_internal(
-    targets,  # type: DistributionTargets
+    targets,  # type: Targets
     direct_requirements,  # type: Iterable[ParsedRequirement]
     requirements=None,  # type: Optional[Iterable[str]]
     requirement_files=None,  # type: Optional[Iterable[str]]
@@ -1061,7 +1086,7 @@ def _download_internal(
 class LocalDistribution(object):
     path = attr.ib()  # type: str
     fingerprint = attr.ib()  # type: str
-    target = attr.ib(default=DistributionTarget.current())  # type: DistributionTarget
+    target = attr.ib(default=targets.current())  # type: Target
 
     @fingerprint.default
     def _calculate_fingerprint(self):
@@ -1079,7 +1104,7 @@ class Downloaded(object):
 
 
 def download(
-    targets=DistributionTargets(),  # type: DistributionTargets
+    targets=Targets(),  # type: Targets
     requirements=None,  # type: Optional[Iterable[str]]
     requirement_files=None,  # type: Optional[Iterable[str]]
     constraint_files=None,  # type: Optional[Iterable[str]]

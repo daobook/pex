@@ -13,8 +13,9 @@ from pex.tracer import TRACER
 from pex.typing import TYPE_CHECKING, Generic
 
 if TYPE_CHECKING:
-    import attr  # vendor:skip
     from typing import Any, Callable, Iterable, Optional, Text, Tuple, TypeVar
+
+    import attr  # vendor:skip
 
     _T = TypeVar("_T")
 else:
@@ -49,14 +50,15 @@ class Job(object):
         self,
         command,  # type: Iterable[str]
         process,  # type: subprocess.Popen
-        finalizer=None,  # type: Optional[Callable[[], None]]
+        finalizer=None,  # type: Optional[Callable[[int], None]]
     ):
         # type: (...) -> None
         """
         :param command: The command used to spawn the job process.
         :param process: The spawned process handle.
-        :param finalizer: An optional cleanup function to call exactly once when the underlying
-                          process terminates in the course of calling this job's public methods.
+        :param finalizer: An optional cleanup function to call exactly once with the process return
+                          code when the underlying process terminates in the course of calling this
+                          job's public methods.
         """
         self._command = tuple(command)
         self._process = process
@@ -130,7 +132,7 @@ class Job(object):
 
     def _finalize_job(self):
         if self._finalizer is not None:
-            self._finalizer()
+            self._finalizer(self._process.returncode)
             self._finalizer = None
 
     def _check_returncode(self, stderr=None):

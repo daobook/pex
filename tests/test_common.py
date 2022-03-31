@@ -3,6 +3,7 @@
 
 import contextlib
 import errno
+import fcntl
 import os
 from contextlib import contextmanager
 
@@ -15,10 +16,12 @@ from pex.common import (
     atomic_directory,
     can_write_dir,
     chmod_plus_x,
+    find_site_packages,
     is_exe,
     is_script,
     open_zip,
     qualified_name,
+    safe_mkdir,
     safe_open,
     temporary_dir,
     touch,
@@ -76,7 +79,7 @@ def test_atomic_directory_empty_workdir_finalize():
         assert not os.path.exists(target_dir)
 
         with atomic_directory(target_dir, exclusive=False) as atomic_dir:
-            assert not atomic_dir.is_finalized
+            assert not atomic_dir.is_finalized()
             assert target_dir == atomic_dir.target_dir
             assert os.path.exists(atomic_dir.work_dir)
             assert os.path.isdir(atomic_dir.work_dir)
@@ -99,7 +102,7 @@ def test_atomic_directory_empty_workdir_failure():
         target_dir = os.path.join(sandbox, "target_dir")
         with pytest.raises(SimulatedRuntimeError):
             with atomic_directory(target_dir, exclusive=False) as atomic_dir:
-                assert not atomic_dir.is_finalized
+                assert not atomic_dir.is_finalized()
                 touch(os.path.join(atomic_dir.work_dir, "created"))
                 raise SimulatedRuntimeError()
 
@@ -117,8 +120,33 @@ def test_atomic_directory_empty_workdir_finalized():
     with temporary_dir() as target_dir:
         with atomic_directory(target_dir, exclusive=False) as work_dir:
             assert (
-                work_dir.is_finalized
+                work_dir.is_finalized()
             ), "When the target_dir exists no work_dir should be created."
+
+
+def test_atomic_directory_deadlock():
+    # type: () -> None
+
+    def mock_lockf(fd, cmd):  # type: (int, int) -> None
+        if cmd == fcntl.LOCK_EX:
+            mock_lockf.lock_call_counter += 1  # type: ignore[attr-defined]
+            if mock_lockf.lock_call_counter < 5:  # type: ignore[attr-defined]
+                raise OSError(
+                    errno.EDEADLK,  # type: ignore[attr-defined] # See https://github.com/python/typeshed/issues/7551
+                    "Resource deadlock avoided",
+                )
+
+    # N.B. Workaround Python 2.7's lack of `nonlocal` support
+    mock_lockf.lock_call_counter = 0  # type: ignore[attr-defined]
+
+    with temporary_dir() as sandbox:
+        target_dir = os.path.join(sandbox, "target_dir")
+        with mock.patch("time.sleep", lambda i: None), mock.patch.object(
+            fcntl, "lockf", mock_lockf
+        ):
+            with atomic_directory(target_dir, exclusive=True) as work_dir:
+                assert not work_dir.is_finalized()
+            assert work_dir.is_finalized()
 
 
 def extract_perms(path):
@@ -428,3 +456,31 @@ def test_qualified_name():
     assert expected_prefix + "static" == qualified_name(
         Test.static
     ), "Expected @staticmethod to be handled."
+
+
+def test_find_site_packages(tmpdir):
+    # type: (Any) -> None
+
+    def tmp_path(*components):
+        # type: (*str) -> str
+        return os.path.join(str(tmpdir), *components)
+
+    assert find_site_packages(tmp_path("does_not_exist")) is None
+
+    file_path = tmp_path("file")
+    touch(file_path)
+    assert find_site_packages(file_path) is None
+
+    empty = tmp_path("empty")
+    os.mkdir(empty)
+    assert find_site_packages(empty) is None
+
+    pypy_venv = tmp_path("pypy_venv")
+    pypy_site_packages = os.path.join(pypy_venv, "site-packages")
+    safe_mkdir(pypy_site_packages)
+    assert pypy_site_packages == find_site_packages(pypy_venv)
+
+    cpython_venv = tmp_path("cpython_venv")
+    cpython_site_packages = os.path.join(cpython_venv, "lib", "python3.10", "site-packages")
+    safe_mkdir(cpython_site_packages)
+    assert cpython_site_packages == find_site_packages(cpython_venv)

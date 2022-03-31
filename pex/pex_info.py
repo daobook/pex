@@ -15,13 +15,13 @@ from pex.inherit_path import InheritPath
 from pex.orderedset import OrderedSet
 from pex.typing import TYPE_CHECKING, cast
 from pex.variables import ENV, Variables
-from pex.venv_bin_path import BinPath
+from pex.venv.bin_path import BinPath
 from pex.version import __version__ as pex_version
 
 if TYPE_CHECKING:
-    from pex.interpreter import PythonInterpreter
-
     from typing import Any, Dict, Mapping, Optional, Text, Union
+
+    from pex.interpreter import PythonInterpreter
 
 
 # TODO(wickman) Split this into a PexInfoBuilder/PexInfo to ensure immutability.
@@ -78,10 +78,10 @@ class PexInfo(object):
             with open_zip(pex) as zf:
                 pex_info = zf.read(cls.PATH)
         elif os.path.isfile(pex):  # Venv PEX
-            with open(os.path.join(os.path.dirname(pex), cls.PATH)) as fp:
+            with open(os.path.join(os.path.dirname(pex), cls.PATH), "rb") as fp:
                 pex_info = fp.read()
         else:  # Directory (Either loose or installed) PEX
-            with open(os.path.join(pex, cls.PATH)) as fp:
+            with open(os.path.join(pex, cls.PATH), "rb") as fp:
                 pex_info = fp.read()
         return cls.from_json(pex_info)
 

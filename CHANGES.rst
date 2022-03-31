@@ -1,6 +1,161 @@
 Release Notes
 =============
 
+2.1.74
+------
+
+This release fixes multiplatform ``--lock`` resolves for sdists that are
+built to multiple platform specific wheels and it also introduces
+support for VCS requirements in locks.
+
+* Add support for locking VCS requirements. (#1687)
+  `PR #1684 <https://github.com/pantsbuild/pex/pull/1687>`_
+
+* Fix ``--lock`` for multiplatform via sdists. (#1689)
+  `PR #1684 <https://github.com/pantsbuild/pex/pull/1689>`_
+
+2.1.73
+------
+
+This is a hotfix for various PEX issues:
+
+#. ``--requirements-pex`` handling was broken by #1661 in the 2.1.71
+   release and is now fixed.
+#. Creating ``universal`` locks now works using any interpreter when the
+   resolver version is the ``pip-2020-resolver``.
+#. Building PEXes with ``--lock`` resolves that contain wheels with
+   build tags in their names now works.
+
+* Fix ``--requirements-pex``. (#1684)
+  `PR #1684 <https://github.com/pantsbuild/pex/pull/1684>`_
+
+* Fix universal locks for the ``pip-2020-resolver``. (#1682)
+  `PR #1682 <https://github.com/pantsbuild/pex/pull/1682>`_
+
+* Fix ``--lock`` resolve wheel tag parsing. (#1678)
+  `PR #1678 <https://github.com/pantsbuild/pex/pull/1678>`_
+
+2.1.72
+------
+
+This release fixes an old bug with ``--venv`` PEXes initially executed
+with either ``PEX_MODULE`` or ``PEX_SCRIPT`` active in the environment.
+
+* Fix venv creation to ignore ambient PEX env vars. (#1669)
+  `PR #1669 <https://github.com/pantsbuild/pex/pull/1669>`_
+
+2.1.71
+------
+
+This release fixes the instability introduced in 2.1.68 by switching to
+a more robust means of determining venv layouts. Along the way it
+upgrades Pex internals to cache all artifacts with strong hashes (
+previously sha1 was used). It's strongly recommended to upgrade or use
+the exclude ``!=2.1.68,!=2.1.69,!=2.1.70`` when depending on an open
+ended Pex version range.
+
+* Switch Pex installed wheels to ``--prefix`` scheme. (#1661)
+  `PR #1661 <https://github.com/pantsbuild/pex/pull/1661>`_
+
+2.1.70
+------
+
+This is another hotfix release for 2.1.68 that fixes a bug in
+``*.data/*`` file handling for installed wheels which is outlined in
+`PEP 427
+<https://www.python.org/dev/peps/pep-0427/#installing-a-wheel-distribution-1-0-py32-none-any-whl>`_
+
+* Handle ``*.data/*`` RECORD entries not existing. (#1644)
+  `PR #1644 <https://github.com/pantsbuild/pex/pull/1644>`_
+
+2.1.69
+------
+
+This is a hotfix release for a regression introduced in 2.1.68 for a
+narrow class of ``--venv`` ``--no-venv-site-packages-copies`` mode
+PEXes with special contents on the ``PEX_PATH``.
+
+*  Fix venv creation for duplicate symlinked dists. (#1639)
+   `PR #1639 <https://github.com/pantsbuild/pex/pull/1639>`_
+
+2.1.68
+------
+
+This release brings a fix for installation of additional data files in
+PEX venvs (More on additional data files `here
+<https://setuptools.pypa.io/en/latest/deprecated/distutils/setupscript.html?highlight=data_files#installing-additional-files>`_)
+as well as a new venv install ``--scope`` that can be used to create fully
+optimized container images with PEXed applications (See how to use this feature `here
+<https://pex.readthedocs.io/en/latest/recipes.html#pex-app-in-a-container>`_).
+
+* Support splitting venv creation into deps & srcs. (#1634)
+  `PR #1634 <https://github.com/pantsbuild/pex/pull/1634>`_
+
+* Fix handling of data files when creating venvs. (#1632)
+  `PR #1632 <https://github.com/pantsbuild/pex/pull/1632>`_
+
+2.1.67
+------
+
+This release brings support for ``--platform`` arguments with a
+3-component PYVER portion. This supports working around
+``python_full_version`` environment marker evaluation failures for
+``--platform`` resolves by changing, for example, a platform of
+``linux_x86_64-cp-38-cp38`` to ``linux_x86_64-cp-3.8.10-cp38``. This is
+likely a simpler way to work around these issues than using the
+``--complete-platform`` facility introduced in 2.1.66 by #1609.
+
+* Expand ``--platform`` syntax: support full versions. (#1614)
+  `PR #1614 <https://github.com/pantsbuild/pex/pull/1614>`_
+
+2.1.66
+------
+
+This release brings a new ``--complete-platform`` Pex CLI option that
+can be used instead of ``--platform`` when more detailed foreign
+platform specification is needed to satisfy a resolve (most commonly,
+when ``python_full_version`` environment markers are in-play). This,
+paired with the new ``pex3 interpreter inspect`` command that can be
+used to generate complete platform data on the foreign platform machine
+being targeted, should allow all foreign platform PEX builds to succeed
+exactly as they would if run on that foreign platform as long as
+pre-built wheels are available for that foreign platform.
+
+Additionally, PEXes now know how to set a useable process name when the
+PEX contains the `setproctitle` distribution. See
+`here <https://pex.readthedocs.io/en/v2.1.66/recipes.html#long-running-pex-applications-and-daemons>`_
+for more information.
+
+* Add support for ``--complete-platform``. (#1609)
+  `PR #1609 <https://github.com/pantsbuild/pex/pull/1609>`_
+
+* Introduce ``pex3 interpreter inspect``. (#1607)
+  `PR #1607 <https://github.com/pantsbuild/pex/pull/1607>`_
+
+* Use setproctitle to sanitize ``ps`` info. (#1605)
+  `PR #1605 <https://github.com/pantsbuild/pex/pull/1605>`_
+
+* Respect ``PEX_ROOT`` in ``PEXEnvironment.mount``. (#1599)
+  `PR #1599 <https://github.com/pantsbuild/pex/pull/1599>`_
+
+2.1.65
+------
+
+This release really brings support for mac universal2 wheels. The fix
+provided by 2.1.64 was partial; universal2 wheels could be resolved at
+build time, but not at runtime.
+
+* Upgrade vendored packaging to 20.9. (#1591)
+  `PR #1591 <https://github.com/pantsbuild/pex/pull/1591>`_
+
+2.1.64
+------
+
+This release brings support for mac universal2 wheels.
+
+* Update vendored Pip to 386a54f0. (#1589)
+  `PR #1589 <https://github.com/pantsbuild/pex/pull/1589>`_
+
 2.1.63
 ------
 

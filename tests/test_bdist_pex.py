@@ -8,11 +8,11 @@ from textwrap import dedent
 
 from pex.common import open_zip, safe_mkdtemp, temporary_dir
 from pex.testing import WheelBuilder, make_project, pex_project_dir, temporary_content
-from pex.tools.commands.virtualenv import Virtualenv
 from pex.typing import TYPE_CHECKING
+from pex.venv.virtualenv import Virtualenv
 
 if TYPE_CHECKING:
-    from typing import Dict, List, Iterator, Iterable, Optional, Union
+    from typing import Dict, Iterable, Iterator, List, Optional, Union
 
 
 BDIST_PEX_VENV = None  # type: Optional[Virtualenv]

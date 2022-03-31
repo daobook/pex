@@ -9,8 +9,9 @@ from pex.network_configuration import NetworkConfiguration
 from pex.typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    import attr  # vendor:skip
     from typing import Optional, Tuple
+
+    import attr  # vendor:skip
 else:
     from pex.third_party import attr
 
@@ -52,3 +53,9 @@ class PexRepositoryConfiguration(object):
     pex_repository = attr.ib()  # type: str
     network_configuration = attr.ib(default=NetworkConfiguration())  # type: NetworkConfiguration
     transitive = attr.ib(default=True)  # type: bool
+
+
+@attr.s(frozen=True)
+class LockRepositoryConfiguration(object):
+    lock_file = attr.ib()  # type: str
+    pip_configuration = attr.ib()  # type: PipConfiguration

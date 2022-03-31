@@ -3,54 +3,119 @@
 
 import itertools
 import pkgutil
+import re
+from textwrap import dedent
 
 import pytest
 
+from pex.pep_425 import CompatibilityTags
 from pex.platforms import Platform
-from pex.third_party.packaging import markers, tags
-from pex.typing import TYPE_CHECKING, cast
-
-if TYPE_CHECKING:
-    from typing import Dict
-
+from pex.third_party.packaging import tags
 
 EXPECTED_BASE = [("py27", "none", "any"), ("py2", "none", "any")]
 
 
 def test_platform():
     # type: () -> None
-    assert Platform("linux-x86_64", "cp", "27", "mu") == Platform(
-        "linux_x86_64", "cp", "27", "cp27mu"
+    assert Platform("linux-x86_64", "cp", "27", (2, 7), "mu") == Platform(
+        "linux_x86_64", "cp", "27", (2, 7), "cp27mu"
     )
-    assert str(Platform("linux-x86_64", "cp", "27", "m")) == "linux_x86_64-cp-27-cp27m"
+    assert Platform("linux-x86_64", "cp", "2.7", (2, 7), "mu") == Platform(
+        "linux_x86_64", "cp", "2.7", (2, 7), "cp27mu"
+    )
+
+    assert str(Platform("linux-x86_64", "cp", "27", (2, 7), "m")) == "linux_x86_64-cp-27-cp27m"
+    assert (
+        str(Platform("linux-x86_64", "cp", "310", (3, 10), "cp310")) == "linux_x86_64-cp-310-cp310"
+    )
+
+    assert (
+        str(Platform("linux-x86_64", "cp", "3.10", (3, 10), "cp310"))
+        == "linux_x86_64-cp-3.10-cp310"
+    )
+    assert (
+        str(Platform("linux-x86_64", "cp", "3.10.1", (3, 10, 1), "cp310"))
+        == "linux_x86_64-cp-3.10.1-cp310"
+    )
 
 
 def test_platform_create():
     # type: () -> None
     assert Platform.create("linux-x86_64-cp-27-cp27mu") == Platform(
-        "linux_x86_64", "cp", "27", "cp27mu"
+        "linux_x86_64", "cp", "27", (2, 7), "cp27mu"
     )
     assert Platform.create("linux-x86_64-cp-27-mu") == Platform(
-        "linux_x86_64", "cp", "27", "cp27mu"
+        "linux_x86_64", "cp", "27", (2, 7), "cp27mu"
     )
     assert Platform.create("macosx-10.4-x86_64-cp-27-m") == Platform(
         "macosx_10_4_x86_64",
         "cp",
         "27",
+        (2, 7),
         "cp27m",
     )
 
 
+def assert_raises(platform, expected_cause):
+    with pytest.raises(
+        Platform.InvalidPlatformError,
+        match=(
+            r".*{literal}.*".format(
+                literal=re.escape(
+                    dedent(
+                        """\
+                        Not a valid platform specifier: {platform}
+                        
+                        {expected_cause}
+                        """
+                    ).format(platform=platform, expected_cause=expected_cause)
+                )
+            )
+        ),
+    ):
+        Platform.create(platform)
+
+
 def test_platform_create_bad_platform_missing_fields():
     # type: () -> None
-    with pytest.raises(Platform.InvalidPlatformError):
-        Platform.create("linux-x86_64")
+    assert_raises(
+        platform="linux_x86_64",
+        expected_cause="There are missing platform fields. Expected 4 but given 1.",
+    )
 
 
 def test_platform_create_bad_platform_empty_fields():
     # type: () -> None
-    with pytest.raises(Platform.InvalidPlatformError):
-        Platform.create("linux-x86_64-cp--cp27mu")
+    assert_raises(
+        platform="linux_x86_64--27-cp27mu",
+        expected_cause="Platform specifiers cannot have blank fields. Given a blank impl.",
+    )
+
+
+def test_platform_create_bad_platform_bad_version():
+    # type: () -> None
+    assert_raises(
+        platform="linux_x86_64-cp-2-cp27mu",
+        expected_cause=(
+            "The version field must either be a 2 or more digit digit major/minor version or else "
+            "a component dotted version. Given: '2'"
+        ),
+    )
+
+    assert_raises(
+        platform="linux_x86_64-cp-XY-cp27mu",
+        expected_cause="The version specified had non-integer components. Given: 'XY'",
+    )
+
+    assert_raises(
+        platform="linux_x86_64-cp-2.-cp27mu",
+        expected_cause="The version specified had non-integer components. Given: '2.'",
+    )
+
+    assert_raises(
+        platform="linux_x86_64-cp-2.Y-cp27mu",
+        expected_cause="The version specified had non-integer components. Given: '2.Y'",
+    )
 
 
 def test_platform_create_noop():
@@ -68,7 +133,7 @@ def test_platform_supported_tags():
     golden_tags = pkgutil.get_data(__name__, "data/platforms/macosx_10_13_x86_64-cp-36-m.tags.txt")
     assert golden_tags is not None
     assert (
-        tuple(
+        CompatibilityTags(
             itertools.chain.from_iterable(
                 tags.parse_tag(tag)
                 for tag in golden_tags.decode("utf-8").splitlines()
@@ -87,60 +152,3 @@ def test_platform_supported_tags_manylinux():
     manylinux2010_tags = frozenset(platform.supported_tags(manylinux="manylinux2010"))
     manylinux2014_tags = frozenset(platform.supported_tags(manylinux="manylinux2014"))
     assert manylinux2014_tags > manylinux2010_tags > manylinux1_tags > tags
-
-
-def test_platform_marker_environment():
-    # type: () -> None
-    platform = Platform.create("linux-x86_64-cp-37-cp37m")
-    env_defaulted = platform.marker_environment(default_unknown=True)
-    env_sparse = platform.marker_environment(default_unknown=False)
-
-    assert set(env_sparse.items()).issubset(set(env_defaulted.items()))
-
-    def evaluate_marker(
-        expression,  # type: str
-        environment,  # type: Dict[str, str]
-    ):
-        # type: (...) -> bool
-        markers.default_environment = environment.copy
-        return cast(bool, markers.Marker(expression).evaluate())
-
-    def assert_known_marker(expression):
-        # type: (str) -> None
-        assert evaluate_marker(expression, env_defaulted)
-        assert evaluate_marker(expression, env_sparse)
-
-    assert_known_marker("python_version == '3.7'")
-    assert_known_marker("implementation_name == 'cpython'")
-    assert_known_marker("platform_system == 'Linux'")
-    assert_known_marker("platform_machine == 'x86_64'")
-
-    def assert_unknown_marker(expression):
-        # type: (str) -> None
-        assert not evaluate_marker(expression, env_defaulted)
-        with pytest.raises(markers.UndefinedEnvironmentName):
-            evaluate_marker(expression, env_sparse)
-
-    assert_unknown_marker("python_full_version == '3.7.10'")
-    assert_unknown_marker("platform_release == '5.12.12-arch1-1'")
-    assert_unknown_marker("platform_version == '#1 SMP PREEMPT Fri, 18 Jun 2021 21:59:22 +0000'")
-
-
-def test_platform_marker_environment_issue_1488():
-    # type: () -> None
-
-    def assert_platform_machine(
-        expected,  # type: str
-        platform,  # type: str
-    ):
-        assert expected == Platform.create(platform).marker_environment()["platform_machine"]
-
-    assert_platform_machine("x86_64", "linux-x86_64-cp-37-cp37m")
-    assert_platform_machine("x86_64", "manylinux1-x86_64-cp-37-cp37m")
-    assert_platform_machine("x86_64", "manylinux2010-x86_64-cp-37-cp37m")
-    assert_platform_machine("x86_64", "manylinux2014-x86_64-cp-37-cp37m")
-    assert_platform_machine("x86_64", "manylinux_2_5-x86_64-cp-37-cp37m")
-    assert_platform_machine("aarch64", "manylinux_2_77-aarch64-cp-37-cp37m")
-
-    assert_platform_machine("x86_64", "macosx-10.15-x86_64-cp-38-m")
-    assert_platform_machine("arm64", "macosx-11.0-arm64-cp-39-cp39")
