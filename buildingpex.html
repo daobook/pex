@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>构建 .pex 文件 &#8212; pex 2.1.63 文档</title>
+    <title>构建 .pex 文件 &#8212; pex 2.1.74 文档</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/classic.css" />
     
@@ -33,7 +33,7 @@
         <li class="right" >
           <a href="whatispex.html" title="什么是 .pex 文件？"
              accesskey="P">上一页</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">pex 2.1.63 文档</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pex 2.1.74 文档</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">构建 .pex 文件</a></li> 
       </ul>
     </div>  
@@ -323,13 +323,39 @@ in certain situations when particular extensions may not be necessary to run a p
 </section>
 <section id="platform">
 <h3><code class="docutils literal notranslate"><span class="pre">--platform</span></code><a class="headerlink" href="#platform" title="永久链接至标题">¶</a></h3>
-<p>The platform to build the pex for. Right now it defaults to the current system, but you can specify
-something like <code class="docutils literal notranslate"><span class="pre">linux-x86_64</span></code> or <code class="docutils literal notranslate"><span class="pre">macosx-10.6-x86_64</span></code>. This will look for bdists for the particular platform.</p>
-<p>To resolve wheels for specific interpreter/platform tags, you can append them to the platform name with hyphens
-like <code class="docutils literal notranslate"><span class="pre">PLATFORM-IMPL-PYVER-ABI</span></code>, where <code class="docutils literal notranslate"><span class="pre">PLATFORM</span></code> is the platform (e.g. <code class="docutils literal notranslate"><span class="pre">linux-x86_64</span></code>,
-<code class="docutils literal notranslate"><span class="pre">macosx-10.4-x86_64</span></code>), <code class="docutils literal notranslate"><span class="pre">IMPL</span></code> is the python implementation abbreviation (e.g. <code class="docutils literal notranslate"><span class="pre">cp</span></code>, <code class="docutils literal notranslate"><span class="pre">pp</span></code>, <code class="docutils literal notranslate"><span class="pre">jp</span></code>), <code class="docutils literal notranslate"><span class="pre">PYVER</span></code>
-is a two-digit string representing the python version (e.g., <code class="docutils literal notranslate"><span class="pre">36</span></code>) and <code class="docutils literal notranslate"><span class="pre">ABI</span></code> is the ABI tag (e.g., <code class="docutils literal notranslate"><span class="pre">cp36m</span></code>,
-<code class="docutils literal notranslate"><span class="pre">cp27mu</span></code>, <code class="docutils literal notranslate"><span class="pre">abi3</span></code>, <code class="docutils literal notranslate"><span class="pre">none</span></code>). A complete example: <code class="docutils literal notranslate"><span class="pre">linux_x86_64-cp-36-cp36m</span></code>.</p>
+<p>The (abbreviated) platform to build the PEX for. This will look for wheels for the particular
+platform.</p>
+<p>The abbreviated platform is described by a string of the form <code class="docutils literal notranslate"><span class="pre">PLATFORM-IMPL-PYVER-ABI</span></code>, where
+<code class="docutils literal notranslate"><span class="pre">PLATFORM</span></code> is the platform (e.g. <code class="docutils literal notranslate"><span class="pre">linux-x86_64</span></code>, <code class="docutils literal notranslate"><span class="pre">macosx-10.4-x86_64</span></code>), <code class="docutils literal notranslate"><span class="pre">IMPL</span></code> is the python
+implementation abbreviation (<code class="docutils literal notranslate"><span class="pre">cp</span></code> or <code class="docutils literal notranslate"><span class="pre">pp</span></code>), <code class="docutils literal notranslate"><span class="pre">PYVER</span></code> is either a two or more digit string
+representing the python version (e.g., <code class="docutils literal notranslate"><span class="pre">36</span></code> or <code class="docutils literal notranslate"><span class="pre">310</span></code>) or else a component dotted version
+string (e.g., <code class="docutils literal notranslate"><span class="pre">3.6</span></code> or <code class="docutils literal notranslate"><span class="pre">3.10.1</span></code>) and <code class="docutils literal notranslate"><span class="pre">ABI</span></code> is the ABI tag (e.g., <code class="docutils literal notranslate"><span class="pre">cp36m</span></code>, <code class="docutils literal notranslate"><span class="pre">cp27mu</span></code>,
+<code class="docutils literal notranslate"><span class="pre">abi3</span></code>, <code class="docutils literal notranslate"><span class="pre">none</span></code>). A complete example: <code class="docutils literal notranslate"><span class="pre">linux_x86_64-cp-36-cp36m</span></code>.</p>
+<p><strong>Constraints</strong>: when <code class="docutils literal notranslate"><span class="pre">--platform</span></code> is used the
+<a class="reference external" href="https://www.python.org/dev/peps/pep-0508/#environment-markers">environment marker</a>
+<code class="docutils literal notranslate"><span class="pre">python_full_version</span></code> will not be available if <code class="docutils literal notranslate"><span class="pre">PYVER</span></code> is not given as a three component dotted
+version since <code class="docutils literal notranslate"><span class="pre">python_full_version</span></code> is meant to have 3 digits (e.g., <code class="docutils literal notranslate"><span class="pre">3.8.10</span></code>). If a
+<code class="docutils literal notranslate"><span class="pre">python_full_version</span></code> environment marker is encountered during a resolve, an
+<code class="docutils literal notranslate"><span class="pre">UndefinedEnvironmentName</span></code> exception will be raised. To remedy this, either specify the full
+version in the platform (e.g, <code class="docutils literal notranslate"><span class="pre">linux_x86_64-cp-3.8.10-cp38</span></code>) or use <code class="docutils literal notranslate"><span class="pre">--complete-platform</span></code>
+instead.</p>
+</section>
+<section id="complete-platform">
+<h3><code class="docutils literal notranslate"><span class="pre">--complete-platform</span></code><a class="headerlink" href="#complete-platform" title="永久链接至标题">¶</a></h3>
+<p>The completely specified platform to build the PEX for. This will look for wheels for the particular
+platform.</p>
+<p>The complete platform can be either a path to a file containing JSON data or else a JSON object
+literal. In either case, the JSON object is expected to have two fields with any other fields
+ignored. The <code class="docutils literal notranslate"><span class="pre">marker_environment</span></code> field should have an object value with string field values
+corresponding to
+<a class="reference external" href="https://www.python.org/dev/peps/pep-0508/#environment-markers">PEP-508 marker environment</a>
+entries. It is OK to only have a subset of valid marker environment fields but it is not valid to
+present entries not defined in PEP-508. The <code class="docutils literal notranslate"><span class="pre">compatible_tags</span></code> field should have an array of
+strings value containing the compatible tags in order from most specific first to least
+specific last as defined in <a class="reference external" href="https://www.python.org/dev/peps/pep-0425">PEP-425</a>. Pex can create
+complete platform JSON for you by running it on the target platform like so:
+<code class="docutils literal notranslate"><span class="pre">pex3</span> <span class="pre">interpreter</span> <span class="pre">inspect</span> <span class="pre">--markers</span> <span class="pre">--tags</span></code>. For more options, particularly to select the desired
+target interpreter see: <code class="docutils literal notranslate"><span class="pre">pex3</span> <span class="pre">interpreter</span> <span class="pre">inspect</span> <span class="pre">--help</span></code>.</p>
 </section>
 </section>
 <section id="tailoring-pex-execution-at-runtime">
@@ -410,6 +436,7 @@ scary like <code class="docutils literal notranslate"><span class="pre">sudo</sp
 <li><a class="reference internal" href="#inherit-path"><code class="docutils literal notranslate"><span class="pre">--inherit-path</span></code></a></li>
 <li><a class="reference internal" href="#ignore-errors"><code class="docutils literal notranslate"><span class="pre">--ignore-errors</span></code></a></li>
 <li><a class="reference internal" href="#platform"><code class="docutils literal notranslate"><span class="pre">--platform</span></code></a></li>
+<li><a class="reference internal" href="#complete-platform"><code class="docutils literal notranslate"><span class="pre">--complete-platform</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#tailoring-pex-execution-at-runtime">Tailoring PEX execution at runtime</a></li>
@@ -467,13 +494,13 @@ scary like <code class="docutils literal notranslate"><span class="pre">sudo</sp
         <li class="right" >
           <a href="whatispex.html" title="什么是 .pex 文件？"
              >上一页</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">pex 2.1.63 文档</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pex 2.1.74 文档</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">构建 .pex 文件</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; 版权所有 2022, Pants project contributors.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+      由 <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0创建。
     </div>
   </body>
 </html>

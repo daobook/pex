@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>PEX Recipes and Notes &#8212; pex 2.1.63 文档</title>
+    <title>PEX Recipes and Notes &#8212; pex 2.1.74 文档</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/classic.css" />
     
@@ -33,7 +33,7 @@
         <li class="right" >
           <a href="buildingpex.html" title="构建 .pex 文件"
              accesskey="P">上一页</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">pex 2.1.63 文档</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pex 2.1.74 文档</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">PEX Recipes and Notes</a></li> 
       </ul>
     </div>  
@@ -45,25 +45,63 @@
             
   <section id="pex-recipes-and-notes">
 <span id="recipes"></span><h1>PEX Recipes and Notes<a class="headerlink" href="#pex-recipes-and-notes" title="永久链接至标题">¶</a></h1>
+<section id="long-running-pex-applications-and-daemons">
+<h2>Long running PEX applications and daemons<a class="headerlink" href="#long-running-pex-applications-and-daemons" title="永久链接至标题">¶</a></h2>
+<p>If your PEXed application will run a long time, at some point you’ll likely need to debug or
+otherwise inspect it using operating system tools. Unless you built your application as a
+non-<code class="docutils literal notranslate"><span class="pre">--venv</span></code> <code class="docutils literal notranslate"><span class="pre">--layout</span> <span class="pre">loose</span></code> PEX, its final process information will be inscrutable in <code class="docutils literal notranslate"><span class="pre">ps</span></code>
+output since all other PEX forms re-execute themselves against an installed version of themselves in
+the configured <code class="docutils literal notranslate"><span class="pre">PEX_ROOT</span></code>.</p>
+<p>You’ll see something like this as a result:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ ./my.pex --foo bar <span class="p">&amp;</span>
+$ ps -o <span class="nb">command</span> <span class="p">|</span> grep pex
+/home/jsirois/.pyenv/versions/3.10.2/bin/python3.10 /home/jsirois/.pex/unzipped_pexes/94790b07dc3768a9926dab999b41a87e399e0aa9 --foo bar
+</pre></div>
+</div>
+<p>The original PEX file is not mentioned anywhere in the <code class="docutils literal notranslate"><span class="pre">ps</span></code> output. Worse, if you have many PEX
+processes it will be unclear which process corresponds to which PEX.</p>
+<p>To remedy this, simply add <a class="reference external" href="https://pypi.org/project/setproctitle/">setproctitle</a> as a dependency
+for your PEX. The PEX runtime will then detect the presence of <code class="docutils literal notranslate"><span class="pre">setproctitle</span></code> and alter the
+process title so you see both the Python being used to run your PEX and the PEX file being run:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ ./my.pex --foo bar <span class="p">&amp;</span>
+$ ps -o <span class="nb">command</span> <span class="p">|</span> grep pex
+/home/jsirois/.pyenv/versions/3.10.2/bin/python3.10 /home/jsirois/dev/pantsbuild/jsirois-pex/my.pex --foo bar
+</pre></div>
+</div>
+</section>
 <section id="pex-app-in-a-container">
 <h2>PEX app in a container<a class="headerlink" href="#pex-app-in-a-container" title="永久链接至标题">¶</a></h2>
 <p>If you want to use a PEX application in a container, you can get the smallest container footprint
 and the lowest latency application start-up by installing it with the <code class="docutils literal notranslate"><span class="pre">venv</span></code> Pex tool. First make
 sure you build the pex with <code class="docutils literal notranslate"><span class="pre">--include-tools</span></code> (or <code class="docutils literal notranslate"><span class="pre">--venv</span></code>), and then install it in the
 container like so:</p>
-<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">COPY</span><span class="w"> </span>my.pex /my-app.pex
-<span class="k">RUN</span><span class="w"> </span><span class="nv">PEX_TOOLS</span><span class="o">=</span><span class="m">1</span> /mp-app.pex venv --rm all --compile /my-app
-<span class="k">ENTRYPOINT</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/mp-app/pex&quot;</span><span class="p">]</span>
+<div class="highlight-dockerfile notranslate"><div class="highlight"><pre><span></span><span class="k">FROM</span><span class="w"> </span><span class="s">python:3.10-slim</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="s">deps</span>
+<span class="k">COPY</span><span class="w"> </span>/my-app.pex /
+<span class="k">RUN</span><span class="w"> </span><span class="nv">PEX_TOOLS</span><span class="o">=</span><span class="m">1</span> /usr/local/bin/python3.10 /my-app.pex venv --scope<span class="o">=</span>deps --compile /my-app
+
+<span class="k">FROM</span><span class="w"> </span><span class="s">python:3.10-slim</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="s">srcs</span>
+<span class="k">COPY</span><span class="w"> </span>/my-app.pex /
+<span class="k">RUN</span><span class="w"> </span><span class="nv">PEX_TOOLS</span><span class="o">=</span><span class="m">1</span> /usr/local/bin/python3.10 /my-app.pex venv --scope<span class="o">=</span>srcs --compile /my-app
+
+<span class="k">FROM</span><span class="w"> </span><span class="s">python:3.10-slim</span>
+<span class="k">COPY</span><span class="w"> </span>--from<span class="o">=</span>deps /my-app /my-app
+<span class="k">COPY</span><span class="w"> </span>--from<span class="o">=</span>srcs /my-app /my-app
+<span class="k">ENTRYPOINT</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/my-app/pex&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
+<p>Here, the first two <code class="docutils literal notranslate"><span class="pre">FROM</span></code> images are illustrative. The only requirement is they need to contain
+the Python interpreter your app should be run with (<code class="docutils literal notranslate"><span class="pre">/usr/local/bin/python3.10</span></code> in this example).</p>
 <p>The Pex <code class="docutils literal notranslate"><span class="pre">venv</span></code> tool will:</p>
 <ol class="arabic simple">
 <li><p>Install the PEX as a traditional venv at <code class="docutils literal notranslate"><span class="pre">/my-app</span></code> with a script at <code class="docutils literal notranslate"><span class="pre">/my-app/pex</span></code> that runs
 just like the original PEX.</p></li>
 <li><p>Pre-compile all PEX Python code installed in the venv.</p></li>
-<li><p>Remove the original <code class="docutils literal notranslate"><span class="pre">/my-app.pex</span></code> as well as any temporary caches created by Pex in the
-<code class="docutils literal notranslate"><span class="pre">PEX_ROOT</span></code>, leaving just the newly installed and pre-compiled <code class="docutils literal notranslate"><span class="pre">/my-app</span></code> venv.</p></li>
 </ol>
+<p>Notably, the PEX venv install is done using a
+<a class="reference external" href="https://docs.docker.com/develop/develop-images/multistage-build/">multi-stage build</a> to ensure
+only the final venv remains on disk and it uses two layers to ensure changes to application code
+do not lead to re-builds of lower layers. This accommodates the common case of modifying and
+re-deploying first party code more often than third party dependencies.</p>
 </section>
 <section id="pex-aware-application">
 <h2>PEX-aware application<a class="headerlink" href="#pex-aware-application" title="永久链接至标题">¶</a></h2>
@@ -133,6 +171,7 @@ $ <span class="nb">export</span> <span class="nv">HTTPS_PROXY</span><span class=
     <h3><a href="index.html">目录</a></h3>
     <ul>
 <li><a class="reference internal" href="#">PEX Recipes and Notes</a><ul>
+<li><a class="reference internal" href="#long-running-pex-applications-and-daemons">Long running PEX applications and daemons</a></li>
 <li><a class="reference internal" href="#pex-app-in-a-container">PEX app in a container</a></li>
 <li><a class="reference internal" href="#pex-aware-application">PEX-aware application</a></li>
 <li><a class="reference internal" href="#gunicorn-and-pex">Gunicorn and PEX</a></li>
@@ -185,13 +224,13 @@ $ <span class="nb">export</span> <span class="nv">HTTPS_PROXY</span><span class=
         <li class="right" >
           <a href="buildingpex.html" title="构建 .pex 文件"
              >上一页</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">pex 2.1.63 文档</a> &#187;</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pex 2.1.74 文档</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">PEX Recipes and Notes</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; 版权所有 2022, Pants project contributors.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+      由 <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.5.0创建。
     </div>
   </body>
 </html>
